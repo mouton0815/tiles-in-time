@@ -41,6 +41,7 @@ try {
     await sleep(1000)
      */
 
+    // Deselect photos
     const photosControl = await driver.findElement(By.xpath('//a[@title="View photos"]'))
     const photosControlColor = await photosControl.getCssValue("background-color")
     console.log('--photos-->', photosControlColor)
@@ -50,14 +51,28 @@ try {
         await sleep(1000)
     }
 
+    // Select max square (TODO: This assumes that auto-zoom is enabled)
+    const squareControl = await driver.findElement(By.xpath('//a[contains(@title, "View Explorer Max Square")]'))
+    const squareControlColor = await squareControl.getCssValue("background-color")
+    console.log('--square-->', squareControlColor)
+    if ('rgba(255, 255, 255, 1)' === squareControlColor ) {
+        console.log('--square--> CLICK')
+        await squareControl.click()
+        await sleep(1000)
+    }
+
+    // Select max cluster. Deselect it first if needed and then re-select (TODO: This assumes that auto-zoom is enabled)
     const clusterControl = await driver.findElement(By.xpath('//a[contains(@title, "View Explorer Max Cluster")]'))
     const clusterControlColor = await clusterControl.getCssValue("background-color")
     console.log('--cluster-->', clusterControlColor)
-    if ('rgba(255, 255, 255, 1)' === clusterControlColor ) {
-        console.log('--cluster--> CLICK')
+    if ('rgba(187, 187, 187, 1)' === clusterControlColor ) {
+        console.log('--cluster--> CLICK to deselect')
         await clusterControl.click()
         await sleep(1000)
     }
+    console.log('--cluster--> CLICK to reselect')
+    await clusterControl.click()
+    await sleep(1000)
 
 
     /*
