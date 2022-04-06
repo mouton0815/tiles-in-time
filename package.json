@@ -1,0 +1,17 @@
+{
+  "name": "tiles-in-time",
+  "description": "Creates snapshops of the VeloViewer Activities screen given a list of dates",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/mouton0815/tiles-in-time.git",
+  "author": "Torsten Schlieder <torsten.schlieder@gmx.net>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "chromedriver": "^100.0.0",
+    "cypress": "^9.5.3"
+  },
+  "devDependencies": {
+    "selenium-webdriver": "^4.1.1"
+  }
+}
