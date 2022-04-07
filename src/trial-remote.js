@@ -18,40 +18,26 @@ try {
 
     // Click on the "activities" menu entry
     const activitiesTab = await driver.wait(until.elementLocated(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]')))
-    //const activitiesTab = await driver.findElement(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]'))
-    //await driver.wait(until.elementIsVisible(activitiesTab))
     await activitiesTab.click()
     console.log('---> Activities clicked')
-    // await sleep(3000) // TODO: Wait for element - which?
 
-    const mapCheckbox = await driver.wait(until.elementLocated(By.id('viewMapCheckBox')))
-    // const mapCheckbox = driver.findElement(By.id('viewMapCheckBox'))
-    // await driver.wait(until.elementIsVisible(mapCheckbox))
-    console.log('---> Map checkbox located')
-    const mapContainer = await driver.wait(until.elementLocated(By.id('mapContainer')))
-    const mapVisibility = await mapContainer.getCssValue("display")
-    console.log('--mapVisibility-->', mapVisibility)
-    if ('none' === mapVisibility) {
-        await mapCheckbox.click()
-        await driver.wait(until.elementIsVisible(mapContainer))
-        console.log('---> Map container visible')
-        // await sleep(2000)
-    }
-    /*
-    // TODO: Strange behavior -- need to figure out which button is selected
-    await driver.findElement(By.id('viewTableCheckBox')).click()
-    await sleep(1000)
-     */
+    // Show map
+    await showContainer('viewMapCheckBox', 'mapContainer')
+
+    // Hide all other containers in order to maximize view port
+    await hideContainer('viewTableCheckBox', 'tableContainer')
+    await hideContainer('viewChartCheckBox', 'chartContainer')
+    await hideContainer('viewPhotosCheckBox', 'photosContainer')
 
     // Deselect photos
-    const photosControl = await driver.wait(until.elementLocated(By.xpath('//a[@title="View photos"]')))
+    const photosControl = await driver.wait(until.elementLocated(By.xpath('//a[contains(@title, "View photos")]')))
     console.log('---> Photos control is located')
     const photosControlColor = await photosControl.getCssValue("background-color")
     console.log('--photos-->', photosControlColor)
     if ('rgba(187, 187, 187, 1)' === photosControlColor ) {
         console.log('--photos--> CLICK')
         await photosControl.click()
-        await sleep(1000)
+        await sleep(100)
     }
 
     // Select max square (TODO: This assumes that auto-zoom is enabled)
@@ -62,7 +48,7 @@ try {
     if ('rgba(255, 255, 255, 1)' === squareControlColor ) {
         console.log('--square--> CLICK')
         await squareControl.click()
-        await sleep(1000)
+        await sleep(100)
     }
 
     // Select max cluster. Deselect it first if needed and then re-select (TODO: This assumes that auto-zoom is enabled)
@@ -73,7 +59,7 @@ try {
     if ('rgba(187, 187, 187, 1)' === clusterControlColor ) {
         console.log('--cluster--> CLICK to deselect')
         await clusterControl.click()
-        await sleep(1000)
+        await sleep(100)
     }
     console.log('--cluster--> CLICK to reselect')
     await clusterControl.click()
@@ -87,6 +73,43 @@ try {
 
 } finally {
     await driver.quit()
+}
+
+async function showContainer(checkboxId, containerId) {
+    const container = await getElementById(containerId)
+    const displayed = await container.isDisplayed()
+    console.log(`---> ${containerId} displayed: ${displayed}`)
+    if (!displayed) {
+        const checkbox = await getElementById(checkboxId)
+        await checkbox.click()
+        await driver.wait(until.elementIsVisible(container))
+        console.log(`---> ${containerId} visible`)
+    }
+}
+
+async function hideContainer(checkboxId, containerId) {
+    const container = await getElementById(containerId)
+    const displayed = await container.isDisplayed()
+    console.log(`---> ${containerId} displayed: ${displayed}`)
+    if (displayed) {
+        const checkbox = await getElementById(checkboxId)
+        await checkbox.click()
+        await driver.wait(until.elementIsNotVisible(container))
+        console.log(`---> ${containerId} hidden`)
+    }
+}
+
+async function isContainerVisible(containerId) {
+    const container = await driver.wait(until.elementLocated(By.id(containerId)))
+    const visibility = await container.getCssValue('display')
+    console.log(`---> ${containerId} visibility: ${visibility}`)
+    return visibility !== 'none'
+}
+
+async function getElementById(id) {
+    const element = await driver.wait(until.elementLocated(By.id(id)))
+    console.log(`---> ${id} located`)
+    return element
 }
 
 async function sleep(time) {
