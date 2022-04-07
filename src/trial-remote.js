@@ -11,29 +11,31 @@ const driver = await new Builder()
     .build()
 
 try {
+    // Load page and wait for title
     await driver.get('https://veloviewer.com')
-    await driver.wait(until.titleContains('VeloViewer'), 3000)
-    /*
-    const y = await driver.findElement(By.id('myTabs'))
-    console.log('--->', y)
-    console.log('--->', await y.isDisplayed())
-    */
-    /*
-    const xx = await driver.findElements(By.xpath('//ul/li/a[@href="/athlete/22548864/activities"]'))
-    for (const x of xx) {
-        console.log('--->', x)
-        console.log('--->', await x.isDisplayed())
-    }
-     */
-    // TODO: Why are those multiple "/activities" hrefs??
-    await driver.findElement(By.xpath('(//a[contains(@href, "/activities")])[2]')).click()
-    await sleep(3000) // TODO: Wait for element - which?
+    await driver.wait(until.titleContains('VeloViewer'))
+    console.log('---> Title found')
 
-    const mapVisibility = await driver.findElement(By.id('mapContainer')).getCssValue("display")
+    // Click on the "activities" menu entry
+    const activitiesTab = await driver.wait(until.elementLocated(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]')))
+    //const activitiesTab = await driver.findElement(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]'))
+    //await driver.wait(until.elementIsVisible(activitiesTab))
+    await activitiesTab.click()
+    console.log('---> Activities clicked')
+    // await sleep(3000) // TODO: Wait for element - which?
+
+    const mapCheckbox = await driver.wait(until.elementLocated(By.id('viewMapCheckBox')))
+    // const mapCheckbox = driver.findElement(By.id('viewMapCheckBox'))
+    // await driver.wait(until.elementIsVisible(mapCheckbox))
+    console.log('---> Map checkbox located')
+    const mapContainer = await driver.wait(until.elementLocated(By.id('mapContainer')))
+    const mapVisibility = await mapContainer.getCssValue("display")
     console.log('--mapVisibility-->', mapVisibility)
     if ('none' === mapVisibility) {
-        await driver.findElement(By.id('viewMapCheckBox')).click()
-        await sleep(2000)
+        await mapCheckbox.click()
+        await driver.wait(until.elementIsVisible(mapContainer))
+        console.log('---> Map container visible')
+        // await sleep(2000)
     }
     /*
     // TODO: Strange behavior -- need to figure out which button is selected
@@ -42,7 +44,8 @@ try {
      */
 
     // Deselect photos
-    const photosControl = await driver.findElement(By.xpath('//a[@title="View photos"]'))
+    const photosControl = await driver.wait(until.elementLocated(By.xpath('//a[@title="View photos"]')))
+    console.log('---> Photos control is located')
     const photosControlColor = await photosControl.getCssValue("background-color")
     console.log('--photos-->', photosControlColor)
     if ('rgba(187, 187, 187, 1)' === photosControlColor ) {
@@ -52,7 +55,8 @@ try {
     }
 
     // Select max square (TODO: This assumes that auto-zoom is enabled)
-    const squareControl = await driver.findElement(By.xpath('//a[contains(@title, "View Explorer Max Square")]'))
+    const squareControl = await driver.wait(until.elementLocated(By.xpath('//a[contains(@title, "View Explorer Max Square")]')))
+    console.log('---> Square control is located')
     const squareControlColor = await squareControl.getCssValue("background-color")
     console.log('--square-->', squareControlColor)
     if ('rgba(255, 255, 255, 1)' === squareControlColor ) {
@@ -62,7 +66,8 @@ try {
     }
 
     // Select max cluster. Deselect it first if needed and then re-select (TODO: This assumes that auto-zoom is enabled)
-    const clusterControl = await driver.findElement(By.xpath('//a[contains(@title, "View Explorer Max Cluster")]'))
+    const clusterControl = await driver.wait(until.elementLocated(By.xpath('//a[contains(@title, "View Explorer Max Cluster")]')))
+    console.log('---> Cluster control is located')
     const clusterControlColor = await clusterControl.getCssValue("background-color")
     console.log('--cluster-->', clusterControlColor)
     if ('rgba(187, 187, 187, 1)' === clusterControlColor ) {
@@ -73,14 +78,6 @@ try {
     console.log('--cluster--> CLICK to reselect')
     await clusterControl.click()
     await sleep(1000)
-
-
-    /*
-    await driver.findElement(By.xpath('//a[@title="View photos"]')).click()
-    await sleep(2000)
-    await driver.findElement(By.xpath('//a[@title="View Explorer Max Cluster"]')).click()
-    await sleep(2000)
-     */
 
     const data = await driver.takeScreenshot()
     const base64Data = data.replace(/^data:image\/png;base64,/,"")
