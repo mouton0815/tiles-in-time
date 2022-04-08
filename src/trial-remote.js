@@ -2,7 +2,7 @@
 
 import 'chromedriver'
 import chrome from 'selenium-webdriver/chrome.js'
-import  { Builder, WebElementCondition, By, Key, until } from 'selenium-webdriver'
+import  { Builder, By, Key, until } from 'selenium-webdriver'
 import sharp from 'sharp'
 
 const driver = await new Builder()
@@ -33,8 +33,16 @@ try {
     await triggerMapControl('View Explorer Max Cluster', true)
 
     const mapDimensions = await getMapDimensions()
-    await takeMapScreenshot(mapDimensions, 'foo.png')
-
+    for (let year = 2010; year <= 2021; year++) {
+        await selectEndDate(`12/31/${year}`)
+        await takeMapScreenshot(mapDimensions, `${year}-12.png`)
+        await sleep(1000)
+    }
+    for (let month = 1; month <= 4; month++) {
+        await selectEndDate(`${month}/31/2022`)
+        await takeMapScreenshot(mapDimensions, `2022-${month}.png`)
+        await sleep(1000)
+    }
 } finally {
     await driver.quit()
 }
@@ -88,6 +96,56 @@ async function triggerMapControl(controlTitle, enableControl) {
         await control.click()
         await sleep(200)
     }
+}
+
+async function selectEndDate(dateStr) {
+    const filterExpander = await getElementById('filtersExpander')
+    await filterExpander.click()
+    console.log('---> FilterExpander clicked')
+    const collapseFilter = await getElementById('collapseFilter')
+    await driver.wait(until.elementIsVisible(collapseFilter))
+    console.log('---> Filter visible')
+
+    const dateField = await getElementById('max0')
+    await dateField.clear()
+    await dateField.sendKeys(dateStr)
+    console.log(`---> Keys ${dateStr} sent`)
+    await sleep(200)
+
+    // Due to a VeloViewer bug, the maximum cluster is sometimes not colored correctly.
+    // De- and then re-selecting the "Ride" checkbox corrects this.
+    await clickRideCheckbox(false)
+    await clickRideCheckbox(true)
+
+    await filterExpander.click()
+    console.log('---> FilterExpander clicked')
+    await driver.wait(until.elementIsNotVisible(collapseFilter))
+    console.log('---> Filter invisible')
+}
+
+async function clickRideCheckbox(targetState) {
+    for (let attempts = 0; attempts < 5; attempts++) {
+        try {
+            const checkbox = await driver.wait(until.elementLocated(By.xpath("//input[@value='Ride']")))
+            let isSelected = await checkbox.isSelected()
+            console.log('---> Checkbox selected:', isSelected)
+            if (targetState === isSelected) {
+                console.log('---> Checkbox already in target state')
+                break
+            }
+            await checkbox.click()
+            console.log(`---> Clicked, attempt ${attempts}`)
+            isSelected = await checkbox.isSelected()
+            console.log('---> Checkbox selected now:', isSelected)
+            if (targetState === isSelected) {
+                break
+            }
+        } catch (e) {
+            console.log(`---> Caught twice, attempt ${attempts}`)
+        }
+        await sleep(100) // Sleep a bit for next attempt
+    }
+    await sleep(100)
 }
 
 async function getMapDimensions() {
