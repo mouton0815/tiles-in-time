@@ -4,7 +4,6 @@ import 'chromedriver'
 import chrome from 'selenium-webdriver/chrome.js'
 import  { Builder, WebElementCondition, By, Key, until } from 'selenium-webdriver'
 import sharp from 'sharp'
-import fs from 'fs'
 
 const driver = await new Builder()
     .forBrowser('chrome')
@@ -12,15 +11,8 @@ const driver = await new Builder()
     .build()
 
 try {
-    // Load page and wait for title
-    await driver.get('https://veloviewer.com')
-    await driver.wait(until.titleContains('VeloViewer'))
-    console.log('---> Title found')
-
-    // Click on the "activities" menu entry
-    const activitiesTab = await driver.wait(until.elementLocated(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]')))
-    await activitiesTab.click()
-    console.log('---> Activities clicked')
+    await loadPage()
+    await openActivitiesTab()
 
     // Show map
     await showContainer('viewMapCheckBox', 'mapContainer')
@@ -31,59 +23,34 @@ try {
     await hideContainer('viewPhotosCheckBox', 'photosContainer')
 
     // Deselect photos
-    const photosControl = await driver.wait(until.elementLocated(By.xpath('//a[contains(@title, "View photos")]')))
-    console.log('---> Photos control is located')
-    const photosControlColor = await photosControl.getCssValue("background-color")
-    console.log('--photos-->', photosControlColor)
-    if ('rgba(187, 187, 187, 1)' === photosControlColor ) {
-        console.log('--photos--> CLICK')
-        await photosControl.click()
-        await sleep(100)
-    }
+    await triggerMapControl('View photos', false)
 
     // Select max square (TODO: This assumes that auto-zoom is enabled)
-    const squareControl = await driver.wait(until.elementLocated(By.xpath('//a[contains(@title, "View Explorer Max Square")]')))
-    console.log('---> Square control is located')
-    const squareControlColor = await squareControl.getCssValue("background-color")
-    console.log('--square-->', squareControlColor)
-    if ('rgba(255, 255, 255, 1)' === squareControlColor ) {
-        console.log('--square--> CLICK')
-        await squareControl.click()
-        await sleep(100)
-    }
+    await triggerMapControl('View Explorer Max Square', true)
 
     // Select max cluster. Deselect it first if needed and then re-select (TODO: This assumes that auto-zoom is enabled)
-    const clusterControl = await driver.wait(until.elementLocated(By.xpath('//a[contains(@title, "View Explorer Max Cluster")]')))
-    console.log('---> Cluster control is located')
-    const clusterControlColor = await clusterControl.getCssValue("background-color")
-    console.log('--cluster-->', clusterControlColor)
-    if ('rgba(187, 187, 187, 1)' === clusterControlColor ) {
-        console.log('--cluster--> CLICK to deselect')
-        await clusterControl.click()
-        await sleep(100)
-    }
-    console.log('--cluster--> CLICK to reselect')
-    await clusterControl.click()
-    await sleep(1000)
+    await triggerMapControl('View Explorer Max Cluster', false)
+    await triggerMapControl('View Explorer Max Cluster', true)
 
-    const mapContainer = await getElementById('mapContainer')
-    const viewPort = await mapContainer.getRect()
-    console.log('---> viewPort: ', viewPort)
-    const dimensions = {
-        left: Math.ceil(viewPort.x),
-        top: Math.ceil(viewPort.y),
-        width: Math.floor(viewPort.width),
-        height: Math.floor(viewPort.height)
-    }
-
-    const base64Shot = await driver.takeScreenshot()
-    const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
-    const imageBuffer = Buffer.from(base64Image, 'base64')
-    await sharp(imageBuffer).png().toFile('foo.png')
-    await sharp(imageBuffer).extract(dimensions).png().toFile('bar.png')
+    const mapDimensions = await getMapDimensions()
+    await takeMapScreenshot(mapDimensions, 'foo.png')
 
 } finally {
     await driver.quit()
+}
+
+async function loadPage() {
+    // Load page and wait for title
+    await driver.get('https://veloviewer.com')
+    await driver.wait(until.titleContains('VeloViewer'))
+    console.log('---> Title found')
+}
+
+async function openActivitiesTab() {
+    // Click on the "activities" menu entry
+    const activitiesTab = await driver.wait(until.elementLocated(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]')))
+    await activitiesTab.click()
+    console.log('---> Activities clicked')
 }
 
 async function showContainer(checkboxId, containerId) {
@@ -108,6 +75,38 @@ async function hideContainer(checkboxId, containerId) {
         await driver.wait(until.elementIsNotVisible(container))
         console.log(`---> ${containerId} hidden`)
     }
+}
+
+async function triggerMapControl(controlTitle, enableControl) {
+    const control = await driver.wait(until.elementLocated(By.xpath(`//a[contains(@title, '${controlTitle}')]`)))
+    console.log(`---> '${controlTitle}' is located`)
+    const backgroundColor = await control.getCssValue('background-color')
+    console.log(`---> '${controlTitle}' color: ${backgroundColor}`)
+    const expectedColor = enableControl ? 'rgba(255, 255, 255, 1)' : 'rgba(187, 187, 187, 1)'
+    if (expectedColor === backgroundColor) {
+        console.log(`---> '${controlTitle}': CLICK`)
+        await control.click()
+        await sleep(200)
+    }
+}
+
+async function getMapDimensions() {
+    const container = await getElementById('mapContainer')
+    const viewPort = await container.getRect()
+    console.log('---> viewPort: ', viewPort)
+    return {
+        left: Math.ceil(viewPort.x),
+        top: Math.ceil(viewPort.y),
+        width: Math.floor(viewPort.width),
+        height: Math.floor(viewPort.height)
+    }
+}
+
+async function takeMapScreenshot(mapDimensions, fileName) {
+    const base64Shot = await driver.takeScreenshot()
+    const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
+    const imageBuffer = Buffer.from(base64Image, 'base64')
+    await sharp(imageBuffer).extract(mapDimensions).png().toFile(fileName)
 }
 
 async function getElementById(id) {
