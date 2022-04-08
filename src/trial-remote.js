@@ -3,6 +3,7 @@
 import 'chromedriver'
 import chrome from 'selenium-webdriver/chrome.js'
 import  { Builder, WebElementCondition, By, Key, until } from 'selenium-webdriver'
+import sharp from 'sharp'
 import fs from 'fs'
 
 const driver = await new Builder()
@@ -65,11 +66,21 @@ try {
     await clusterControl.click()
     await sleep(1000)
 
-    const data = await driver.takeScreenshot()
-    const base64Data = data.replace(/^data:image\/png;base64,/,"")
-    fs.writeFile("out.png", base64Data, 'base64', function(err) {
-        if(err) console.log(err)
-    })
+    const mapContainer = await getElementById('mapContainer')
+    const viewPort = await mapContainer.getRect()
+    console.log('---> viewPort: ', viewPort)
+    const dimensions = {
+        left: Math.ceil(viewPort.x),
+        top: Math.ceil(viewPort.y),
+        width: Math.floor(viewPort.width),
+        height: Math.floor(viewPort.height)
+    }
+
+    const base64Shot = await driver.takeScreenshot()
+    const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
+    const imageBuffer = Buffer.from(base64Image, 'base64')
+    await sharp(imageBuffer).png().toFile('foo.png')
+    await sharp(imageBuffer).extract(dimensions).png().toFile('bar.png')
 
 } finally {
     await driver.quit()
@@ -97,13 +108,6 @@ async function hideContainer(checkboxId, containerId) {
         await driver.wait(until.elementIsNotVisible(container))
         console.log(`---> ${containerId} hidden`)
     }
-}
-
-async function isContainerVisible(containerId) {
-    const container = await driver.wait(until.elementLocated(By.id(containerId)))
-    const visibility = await container.getCssValue('display')
-    console.log(`---> ${containerId} visibility: ${visibility}`)
-    return visibility !== 'none'
 }
 
 async function getElementById(id) {
