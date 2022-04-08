@@ -9,7 +9,6 @@
   "type": "module",
   "dependencies": {
     "chromedriver": "^100.0.0",
-    "cypress": "^9.5.3",
     "sharp": "^0.30.3"
   },
   "devDependencies": {
