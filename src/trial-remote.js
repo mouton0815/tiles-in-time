@@ -5,6 +5,118 @@ import chrome from 'selenium-webdriver/chrome.js'
 import  { Builder, By, Key, until } from 'selenium-webdriver'
 import sharp from 'sharp'
 
+const DATES = [
+    '2010-04-01',
+    '2010-05-01',
+    '2010-06-01',
+    '2010-07-01',
+    '2010-08-01',
+    '2010-09-01',
+    '2010-10-01',
+    '2010-11-01',
+    /*
+    '2011-04-01',
+    '2011-05-01',
+    '2011-06-01',
+    '2011-07-01',
+    '2011-08-01',
+    '2011-09-01',
+    '2011-10-01',
+    '2011-11-01',
+    '2011-12-01',
+
+    '2012-03-01',
+    '2012-04-01',
+    '2012-05-01',
+    '2012-06-01',
+    '2012-07-01',
+    '2012-08-01',
+    '2012-09-01',
+    '2012-10-01',
+
+    '2013-06-01',
+    '2013-07-01',
+    '2013-08-01',
+    '2013-09-01',
+    '2013-10-01',
+
+    '2014-05-01',
+    '2014-06-01',
+    '2014-07-01',
+    '2014-08-01',
+    '2014-09-01',
+    '2014-10-01',
+    '2014-11-01',
+    '2014-12-01',
+
+    '2015-04-01',
+    '2015-05-01',
+    '2015-06-01',
+    '2015-07-01',
+    '2015-08-01',
+    '2015-09-01',
+    '2015-10-01',
+    '2015-11-01',
+    '2015-12-01',
+
+    '2016-05-01',
+    '2016-06-01',
+    '2016-08-01',
+    '2016-09-01',
+    '2016-10-01',
+    '2016-11-01',
+
+    '2017-04-01',
+    '2017-05-01',
+    '2017-06-01',
+    '2017-07-01',
+    '2017-08-01',
+    '2017-09-01',
+    '2017-10-01',
+    '2017-12-01',
+
+    '2018-04-01',
+    '2018-05-01',
+    '2018-06-01',
+    '2018-07-01',
+    '2018-08-01',
+    '2018-09-01',
+    '2018-10-01',
+    '2018-11-01',
+    '2018-12-01',
+
+    '2019-04-01',
+    '2019-05-01',
+    '2019-06-01',
+    '2019-07-01',
+    '2019-08-01',
+    '2019-09-01',
+    '2019-10-01',
+    '2019-11-01',
+    '2019-12-01',
+
+    '2020-04-01',
+    '2020-05-01',
+    '2020-06-01',
+    '2020-07-01',
+    '2020-09-01',
+    '2020-10-01',
+    '2020-11-01',
+    '2020-12-01',
+
+    '2021-03-01',
+    '2021-05-01',
+    '2021-06-01',
+    '2021-07-01',
+    '2021-08-01',
+    '2021-09-01',
+    '2021-10-01',
+    '2021-11-01',
+    '2021-12-01',
+    */
+    '2022-01-01',
+]
+
 const driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(new chrome.Options().debuggerAddress('127.0.0.1:9222'))
@@ -22,7 +134,7 @@ try {
     await hideContainer('viewChartCheckBox', 'chartContainer')
     await hideContainer('viewPhotosCheckBox', 'photosContainer')
 
-    // Deselect photos
+    // Deselect photos on map
     await triggerMapControl('View photos', false)
 
     // Select max square (TODO: This assumes that auto-zoom is enabled)
@@ -33,6 +145,14 @@ try {
     await triggerMapControl('View Explorer Max Cluster', true)
 
     const mapDimensions = await getMapDimensions()
+    for (let isoDate of DATES) {
+        const [year, month, day] = isoDate.split('-', 3);
+        await selectEndDate(`${month}/${day}/${year}`)
+        await takeMapScreenshot(mapDimensions, `${isoDate}.png`)
+        await sleep(1000)
+    }
+
+    /*
     for (let year = 2010; year <= 2021; year++) {
         await selectEndDate(`12/31/${year}`)
         await takeMapScreenshot(mapDimensions, `${year}-12.png`)
@@ -43,6 +163,7 @@ try {
         await takeMapScreenshot(mapDimensions, `2022-${month}.png`)
         await sleep(1000)
     }
+    */
 } finally {
     await driver.quit()
 }
@@ -145,7 +266,7 @@ async function clickRideCheckbox(targetState) {
         }
         await sleep(100) // Sleep a bit for next attempt
     }
-    await sleep(100)
+    await sleep(200)
 }
 
 async function getMapDimensions() {
