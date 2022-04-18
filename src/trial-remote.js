@@ -8,7 +8,6 @@ import jimp from 'jimp'
 
 
 const DATES = [
-    /*
     '2010-04-01',
     '2010-05-01',
     '2010-06-01',
@@ -28,6 +27,7 @@ const DATES = [
     '2011-11-01',
     '2011-12-01',
 
+    /*
     '2012-03-01',
     '2012-04-01',
     '2012-05-01',
@@ -133,6 +133,7 @@ const DATES = [
     '2022-03-25',
     '2022-03-26',
     '2022-04-02',
+    '2022-04-16',
 ]
 
 const driver = await new Builder()
@@ -141,47 +142,14 @@ const driver = await new Builder()
     .build()
 
 try {
-    /*
-    await loadPage()
-    await openActivitiesTab()
-
-    // Show map
-    await showContainer('viewMapCheckBox', 'mapContainer')
-
-    // Hide all other containers in order to maximize view port
-    await hideContainer('viewTableCheckBox', 'tableContainer')
-    await hideContainer('viewChartCheckBox', 'chartContainer')
-    await hideContainer('viewPhotosCheckBox', 'photosContainer')
-
-    // Deselect photos on map
-    await triggerMapControl('View photos', false)
-
-    // Select max square (TODO: This assumes that auto-zoom is enabled)
-    await triggerMapControl('View Explorer Max Square', true)
-
-    // Select max cluster. Deselect it first if needed and then re-select (TODO: This assumes that auto-zoom is enabled)
-    await triggerMapControl('View Explorer Max Cluster', false)
-    await triggerMapControl('View Explorer Max Cluster', true)
-    */
-
-    /*
-    console.log('---> OPEN')
-    await openFilters()
-    await sleep(500) // To let map expand TODO: Needed?
-    console.log('---> CLOSE')
-    await closeFilters()
-    console.log('---> CLOSED')
-    await sleep(500) // To let map expand TODO: Needed?
-    */
+    await prepareMapView()
 
     const mapDimensions = await getMapDimensions()
     for (let index = 0; index < DATES.length; index++) {
         const isoDate = DATES[index]
         const [year, month, day] = isoDate.split('-', 3);
         await selectEndDate(`${month}/${day}/${year}`, index)
-        // await sleep(3000) // The "Show Filters" menu needs time to collapse -- TODO: How to observe this w/o waiting?
         await takeMapScreenshot(mapDimensions, isoDate, index)
-        // await sleep(200)
     }
 
     /*
@@ -200,24 +168,53 @@ try {
     await driver.quit()
 }
 
+/**
+ * Loads VeloViewer page and opens the map view
+ */
+async function prepareMapView() {
+    await loadPage()
+    await openActivitiesTab()
+    await sleep(3000) // Let the filters bar collapse automatically // TODO: Can this be done better?
+
+    // Show map
+    await showContainer('viewMapCheckBox', 'mapContainer')
+
+    // Hide all other containers in order to maximize view port
+    await hideContainer('viewTableCheckBox', 'tableContainer')
+    await hideContainer('viewChartCheckBox', 'chartContainer')
+    await hideContainer('viewPhotosCheckBox', 'photosContainer')
+
+    await openFilters()
+
+    // Deselect photos on map
+    await triggerMapControl('View photos', false)
+
+    // Select max square (TODO: This assumes that auto-zoom is enabled)
+    await triggerMapControl('View Explorer Max Square', true)
+
+    // Select max cluster. Deselect it first if needed and then re-select (TODO: This assumes that auto-zoom is enabled)
+    await triggerMapControl('View Explorer Max Cluster', false)
+    await triggerMapControl('View Explorer Max Cluster', true)
+}
+
 async function loadPage() {
     // Load page and wait for title
     await driver.get('https://veloviewer.com')
     await driver.wait(until.titleContains('VeloViewer'))
-    console.log('---> Title found')
+    console.log('---> Page loaded')
 }
 
 async function openActivitiesTab() {
     // Click on the "activities" menu entry
     const activitiesTab = await driver.wait(until.elementLocated(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]')))
     await activitiesTab.click()
-    console.log('---> Activities clicked')
+    console.log('---> Activities opened')
 }
 
 async function showContainer(checkboxId, containerId) {
     const container = await getElementById(containerId)
     const displayed = await container.isDisplayed()
-    console.log(`---> ${containerId} displayed: ${displayed}`)
+    // console.log(`---> ${containerId} displayed: ${displayed}`)
     if (!displayed) {
         const checkbox = await getElementById(checkboxId)
         await checkbox.click()
@@ -229,7 +226,7 @@ async function showContainer(checkboxId, containerId) {
 async function hideContainer(checkboxId, containerId) {
     const container = await getElementById(containerId)
     const displayed = await container.isDisplayed()
-    console.log(`---> ${containerId} displayed: ${displayed}`)
+    // console.log(`---> ${containerId} displayed: ${displayed}`)
     if (displayed) {
         const checkbox = await getElementById(checkboxId)
         await checkbox.click()
@@ -243,21 +240,21 @@ async function triggerMapControl(controlTitle, enableControl) {
     // console.log(`---> '${controlTitle}' is located`)
     const backgroundColor = await control.getCssValue('background-color')
     // console.log(`---> '${controlTitle}' color: ${backgroundColor}`)
-    const expectedColor = enableControl ? 'rgba(255, 255, 255, 1)' : 'rgba(187, 187, 187, 1)'
-    if (expectedColor === backgroundColor) {
-        // console.log(`---> '${controlTitle}': CLICK`)
+    const expectedColor = enableControl ? 'rgba(187, 187, 187, 1)' : 'rgba(255, 255, 255, 1)'
+    if (expectedColor !== backgroundColor) {
+        console.log(`---> '${controlTitle}': CLICK`)
         await control.click()
-        await sleep(200)
+        await sleep(300)
     }
 }
 
 async function openFilters() {
     const filterExpander = await getElementById('filtersExpander')
     await filterExpander.click()
-    // console.log('---> FilterExpander clicked')
+    console.log('---> FilterExpander clicked')
     const collapseFilter = await getElementById('collapseFilter')
     await driver.wait(until.elementIsVisible(collapseFilter))
-    // console.log('---> Filter visible')
+    console.log('---> Filters visible')
 }
 
 async function closeFilters() {
@@ -270,26 +267,19 @@ async function closeFilters() {
 }
 
 async function selectEndDate(dateStr) {
-    // await openFilters()
-
     const dateField = await getElementById('max0')
     await dateField.clear()
     await dateField.sendKeys(dateStr)
-    // console.log(`---> Keys ${dateStr} sent`)
-    // await sleep(200) // TODO: Enable?
 
     // Due to a VeloViewer bug, the maximum cluster is sometimes not colored correctly.
     // De- and then re-selecting the "Ride" checkbox corrects this.
     await clickRideCheckbox(false)
     await clickRideCheckbox(true)
-    // await sleep(1000) // Closing the Ride checkbox makes the map re-arrange, thus wait TODO: Needed?
-
-    // await closeFilters()
 }
 
 async function clickRideCheckbox(targetState) {
-    // await sleep(100) // Initial wait to lower failure risk TODO: Needed?
-    for (let attempts = 0; attempts < 5; attempts++) {
+    let attempts = 0
+    while (true) {
         try {
             const checkbox = await driver.wait(until.elementLocated(By.xpath("//input[@value='Ride']")))
             let isSelected = await checkbox.isSelected()
@@ -306,13 +296,18 @@ async function clickRideCheckbox(targetState) {
                 break
             }
         } catch (e) {
+            /*
+            ++attempts
             if (attempts >= 1) {
                 console.log(`---> Caught, attempt ${attempts + 1}`)
+            }
+            */
+            if (++attempts === 10) {
+                throw new Error('Selecting the "Ride" checkbox failed after 10 attempts')
             }
             await sleep(100) // Sleep a bit for next attempt
         }
     }
-    // await sleep(200)
 }
 
 async function getMapDimensions() {
@@ -328,7 +323,7 @@ async function getMapDimensions() {
 }
 
 async function takeMapScreenshot(mapDimensions, isoDate, counter) {
-    console.log('---> take screenshot of', isoDate)
+    console.log(`---> take screenshot of ${isoDate} with dimensions`, mapDimensions)
     const base64Shot = await driver.takeScreenshot()
     const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
     const imageBuffer = Buffer.from(base64Image, 'base64')
