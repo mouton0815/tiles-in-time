@@ -1,11 +1,14 @@
 // chrome --remote-debugging-port=9222 --user-data-dir="C:\tmp\ChromeProfile"
+// C:\Tools\ffmpeg-n5.0\bin\ffmpeg.exe -framerate 0.5 -i img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
 
 import 'chromedriver'
 import chrome from 'selenium-webdriver/chrome.js'
-import  { Builder, By, Key, until } from 'selenium-webdriver'
-import sharp from 'sharp'
+import  { Builder, By, until } from 'selenium-webdriver'
+import jimp from 'jimp'
+
 
 const DATES = [
+    /*
     '2010-04-01',
     '2010-05-01',
     '2010-06-01',
@@ -14,7 +17,7 @@ const DATES = [
     '2010-09-01',
     '2010-10-01',
     '2010-11-01',
-    /*
+
     '2011-04-01',
     '2011-05-01',
     '2011-06-01',
@@ -114,7 +117,22 @@ const DATES = [
     '2021-11-01',
     '2021-12-01',
     */
+
     '2022-01-01',
+    '2022-02-22',
+    '2022-02-23',
+    '2022-02-26',
+    '2022-02-27',
+    '2022-03-03',
+    '2022-03-05',
+    '2022-03-10',
+    '2022-03-12',
+    '2022-03-20',
+    '2022-03-22',
+    '2022-03-23',
+    '2022-03-25',
+    '2022-03-26',
+    '2022-04-02',
 ]
 
 const driver = await new Builder()
@@ -144,12 +162,17 @@ try {
     await triggerMapControl('View Explorer Max Cluster', false)
     await triggerMapControl('View Explorer Max Cluster', true)
 
+    // await openFilters()
+    // await sleep(500)
+
     const mapDimensions = await getMapDimensions()
-    for (let isoDate of DATES) {
+    for (let index = 0; index < DATES.length; index++) {
+        const isoDate = DATES[index]
         const [year, month, day] = isoDate.split('-', 3);
-        await selectEndDate(`${month}/${day}/${year}`)
-        await takeMapScreenshot(mapDimensions, `${isoDate}.png`)
-        await sleep(1000)
+        await selectEndDate(`${month}/${day}/${year}`, index)
+        await sleep(800) // The "Show Filters" menu needs time to collapse -- TODO: How to observe this w/o waiting?
+        await takeMapScreenshot(mapDimensions, isoDate, index)
+        await sleep(200)
     }
 
     /*
@@ -219,13 +242,26 @@ async function triggerMapControl(controlTitle, enableControl) {
     }
 }
 
-async function selectEndDate(dateStr) {
+async function openFilters() {
     const filterExpander = await getElementById('filtersExpander')
     await filterExpander.click()
     console.log('---> FilterExpander clicked')
     const collapseFilter = await getElementById('collapseFilter')
     await driver.wait(until.elementIsVisible(collapseFilter))
     console.log('---> Filter visible')
+}
+
+async function closeFilters() {
+    const filterExpander = await getElementById('filtersExpander')
+    await filterExpander.click()
+    console.log('---> FilterExpander clicked')
+    const collapseFilter = await getElementById('collapseFilter')
+    await driver.wait(until.elementIsNotVisible(collapseFilter))
+    console.log('---> Filter invisible')
+}
+
+async function selectEndDate(dateStr) {
+    await openFilters()
 
     const dateField = await getElementById('max0')
     await dateField.clear()
@@ -238,10 +274,7 @@ async function selectEndDate(dateStr) {
     await clickRideCheckbox(false)
     await clickRideCheckbox(true)
 
-    await filterExpander.click()
-    console.log('---> FilterExpander clicked')
-    await driver.wait(until.elementIsNotVisible(collapseFilter))
-    console.log('---> Filter invisible')
+    await closeFilters()
 }
 
 async function clickRideCheckbox(targetState) {
@@ -272,20 +305,26 @@ async function clickRideCheckbox(targetState) {
 async function getMapDimensions() {
     const container = await getElementById('mapContainer')
     const viewPort = await container.getRect()
-    console.log('---> viewPort: ', viewPort)
+    console.log('---> map viewport:', viewPort)
     return {
-        left: Math.ceil(viewPort.x),
-        top: Math.ceil(viewPort.y),
-        width: Math.floor(viewPort.width),
-        height: Math.floor(viewPort.height)
+        x: Math.ceil(viewPort.x),
+        y: Math.ceil(viewPort.y),
+        w: Math.floor(viewPort.width),
+        h: Math.floor(viewPort.height)
     }
 }
 
-async function takeMapScreenshot(mapDimensions, fileName) {
+async function takeMapScreenshot(mapDimensions, isoDate, counter) {
+    console.log('---> take screenshot of', mapDimensions)
     const base64Shot = await driver.takeScreenshot()
     const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
     const imageBuffer = Buffer.from(base64Image, 'base64')
-    await sharp(imageBuffer).extract(mapDimensions).png().toFile(fileName)
+    const image = await jimp.read(imageBuffer)
+    image.crop(mapDimensions.x, mapDimensions.y, mapDimensions.w, mapDimensions.h)
+    const font = await jimp.loadFont(jimp.FONT_SANS_32_BLACK)
+    image.print(font, 20, mapDimensions.h - 50, isoDate)
+    const fileName = `img${String(counter).padStart(3, '0')}.png`
+    await image.writeAsync(fileName)
 }
 
 async function getElementById(id) {

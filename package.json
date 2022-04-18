@@ -9,7 +9,7 @@
   "type": "module",
   "dependencies": {
     "chromedriver": "^100.0.0",
-    "sharp": "^0.30.3"
+    "jimp": "^0.16.1"
   },
   "devDependencies": {
     "selenium-webdriver": "^4.1.1"
