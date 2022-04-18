@@ -106,6 +106,7 @@ const DATES = [
     '2020-10-01',
     '2020-11-01',
     '2020-12-01',
+    */
 
     '2021-03-01',
     '2021-05-01',
@@ -116,7 +117,6 @@ const DATES = [
     '2021-10-01',
     '2021-11-01',
     '2021-12-01',
-    */
 
     '2022-01-01',
     '2022-02-22',
@@ -141,6 +141,7 @@ const driver = await new Builder()
     .build()
 
 try {
+    /*
     await loadPage()
     await openActivitiesTab()
 
@@ -161,18 +162,26 @@ try {
     // Select max cluster. Deselect it first if needed and then re-select (TODO: This assumes that auto-zoom is enabled)
     await triggerMapControl('View Explorer Max Cluster', false)
     await triggerMapControl('View Explorer Max Cluster', true)
+    */
 
-    // await openFilters()
-    // await sleep(500)
+    /*
+    console.log('---> OPEN')
+    await openFilters()
+    await sleep(500) // To let map expand TODO: Needed?
+    console.log('---> CLOSE')
+    await closeFilters()
+    console.log('---> CLOSED')
+    await sleep(500) // To let map expand TODO: Needed?
+    */
 
     const mapDimensions = await getMapDimensions()
     for (let index = 0; index < DATES.length; index++) {
         const isoDate = DATES[index]
         const [year, month, day] = isoDate.split('-', 3);
         await selectEndDate(`${month}/${day}/${year}`, index)
-        await sleep(800) // The "Show Filters" menu needs time to collapse -- TODO: How to observe this w/o waiting?
+        // await sleep(3000) // The "Show Filters" menu needs time to collapse -- TODO: How to observe this w/o waiting?
         await takeMapScreenshot(mapDimensions, isoDate, index)
-        await sleep(200)
+        // await sleep(200)
     }
 
     /*
@@ -231,12 +240,12 @@ async function hideContainer(checkboxId, containerId) {
 
 async function triggerMapControl(controlTitle, enableControl) {
     const control = await driver.wait(until.elementLocated(By.xpath(`//a[contains(@title, '${controlTitle}')]`)))
-    console.log(`---> '${controlTitle}' is located`)
+    // console.log(`---> '${controlTitle}' is located`)
     const backgroundColor = await control.getCssValue('background-color')
-    console.log(`---> '${controlTitle}' color: ${backgroundColor}`)
+    // console.log(`---> '${controlTitle}' color: ${backgroundColor}`)
     const expectedColor = enableControl ? 'rgba(255, 255, 255, 1)' : 'rgba(187, 187, 187, 1)'
     if (expectedColor === backgroundColor) {
-        console.log(`---> '${controlTitle}': CLICK`)
+        // console.log(`---> '${controlTitle}': CLICK`)
         await control.click()
         await sleep(200)
     }
@@ -245,68 +254,72 @@ async function triggerMapControl(controlTitle, enableControl) {
 async function openFilters() {
     const filterExpander = await getElementById('filtersExpander')
     await filterExpander.click()
-    console.log('---> FilterExpander clicked')
+    // console.log('---> FilterExpander clicked')
     const collapseFilter = await getElementById('collapseFilter')
     await driver.wait(until.elementIsVisible(collapseFilter))
-    console.log('---> Filter visible')
+    // console.log('---> Filter visible')
 }
 
 async function closeFilters() {
     const filterExpander = await getElementById('filtersExpander')
     await filterExpander.click()
-    console.log('---> FilterExpander clicked')
+    // console.log('---> FilterExpander clicked')
     const collapseFilter = await getElementById('collapseFilter')
     await driver.wait(until.elementIsNotVisible(collapseFilter))
-    console.log('---> Filter invisible')
+    // console.log('---> Filter invisible')
 }
 
 async function selectEndDate(dateStr) {
-    await openFilters()
+    // await openFilters()
 
     const dateField = await getElementById('max0')
     await dateField.clear()
     await dateField.sendKeys(dateStr)
-    console.log(`---> Keys ${dateStr} sent`)
-    await sleep(200)
+    // console.log(`---> Keys ${dateStr} sent`)
+    // await sleep(200) // TODO: Enable?
 
     // Due to a VeloViewer bug, the maximum cluster is sometimes not colored correctly.
     // De- and then re-selecting the "Ride" checkbox corrects this.
     await clickRideCheckbox(false)
     await clickRideCheckbox(true)
+    // await sleep(1000) // Closing the Ride checkbox makes the map re-arrange, thus wait TODO: Needed?
 
-    await closeFilters()
+    // await closeFilters()
 }
 
 async function clickRideCheckbox(targetState) {
+    // await sleep(100) // Initial wait to lower failure risk TODO: Needed?
     for (let attempts = 0; attempts < 5; attempts++) {
         try {
             const checkbox = await driver.wait(until.elementLocated(By.xpath("//input[@value='Ride']")))
             let isSelected = await checkbox.isSelected()
-            console.log('---> Checkbox selected:', isSelected)
+            // console.log('---> Checkbox selected:', isSelected)
             if (targetState === isSelected) {
                 console.log('---> Checkbox already in target state')
                 break
             }
             await checkbox.click()
-            console.log(`---> Clicked, attempt ${attempts}`)
+            // console.log(`---> Clicked, attempt ${attempts + 1}`)
             isSelected = await checkbox.isSelected()
-            console.log('---> Checkbox selected now:', isSelected)
+            //console.log('---> Checkbox selected now:', isSelected)
             if (targetState === isSelected) {
                 break
             }
         } catch (e) {
-            console.log(`---> Caught twice, attempt ${attempts}`)
+            if (attempts >= 1) {
+                console.log(`---> Caught, attempt ${attempts + 1}`)
+            }
+            await sleep(100) // Sleep a bit for next attempt
         }
-        await sleep(100) // Sleep a bit for next attempt
     }
-    await sleep(200)
+    // await sleep(200)
 }
 
 async function getMapDimensions() {
     const container = await getElementById('mapContainer')
     const viewPort = await container.getRect()
-    console.log('---> map viewport:', viewPort)
-    return {
+    // console.log('---> map viewport raw:', viewPort)
+    return  {
         x: Math.ceil(viewPort.x),
         y: Math.ceil(viewPort.y),
         w: Math.floor(viewPort.width),
@@ -315,10 +328,11 @@ async function getMapDimensions() {
 }
 
 async function takeMapScreenshot(mapDimensions, isoDate, counter) {
-    console.log('---> take screenshot of', mapDimensions)
+    console.log('---> take screenshot of', isoDate)
     const base64Shot = await driver.takeScreenshot()
     const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
     const imageBuffer = Buffer.from(base64Image, 'base64')
+
     const image = await jimp.read(imageBuffer)
     image.crop(mapDimensions.x, mapDimensions.y, mapDimensions.w, mapDimensions.h)
     const font = await jimp.loadFont(jimp.FONT_SANS_32_BLACK)
@@ -329,7 +343,7 @@ async function takeMapScreenshot(mapDimensions, isoDate, counter) {
 
 async function getElementById(id) {
     const element = await driver.wait(until.elementLocated(By.id(id)))
-    console.log(`---> ${id} located`)
+    // console.log(`---> ${id} located`)
     return element
 }
 
