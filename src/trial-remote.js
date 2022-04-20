@@ -5,126 +5,8 @@ import 'chromedriver'
 import chrome from 'selenium-webdriver/chrome.js'
 import  { Builder, By, until } from 'selenium-webdriver'
 import jimp from 'jimp'
+import fs from 'fs'
 
-
-const DATES = [
-    '2010-04-01',
-    '2010-05-01',
-    '2010-06-01',
-    '2010-07-01',
-    '2010-08-01',
-    '2010-09-01',
-    '2010-10-01',
-    '2010-11-01',
-
-    '2011-04-01',
-    '2011-05-01',
-    '2011-06-01',
-    '2011-07-01',
-    '2011-08-01',
-    '2011-09-01',
-    '2011-10-01',
-    '2011-12-01',
-
-    '2012-03-01',
-    '2012-05-01',
-    '2012-06-01',
-    '2012-07-01',
-    '2012-08-01',
-    '2012-10-01',
-
-    '2013-06-01',
-    '2013-07-01',
-    '2013-08-01',
-    '2013-09-01',
-    '2013-10-01',
-
-    '2014-05-01',
-    '2014-06-01',
-    '2014-07-01',
-    '2014-08-01',
-    '2014-09-01',
-    '2014-10-01',
-    '2014-11-01',
-    '2014-12-01',
-
-    '2015-04-01',
-    '2015-06-01',
-    '2015-07-01',
-    '2015-08-01',
-    '2015-09-01',
-    '2015-10-01',
-    '2015-11-01',
-    '2015-12-01',
-
-    '2016-05-01',
-    '2016-06-01',
-    '2016-08-01',
-    '2016-10-01',
-    '2016-11-01',
-
-    '2017-04-01',
-    '2017-05-01',
-    '2017-06-01',
-    '2017-07-01',
-    '2017-08-01',
-    '2017-09-01',
-    '2017-10-01',
-    '2017-12-01',
-
-    '2018-04-01',
-    '2018-05-01',
-    '2018-06-01',
-    '2018-07-01',
-    '2018-09-01',
-    '2018-10-01',
-    '2018-11-01',
-    '2018-12-01',
-
-    '2019-04-01',
-    '2019-05-01',
-    '2019-06-01',
-    '2019-07-01',
-    '2019-08-01',
-    '2019-09-01',
-    '2019-10-01',
-    '2019-11-01',
-    '2019-12-01',
-
-    '2020-04-01',
-    '2020-05-01',
-    '2020-07-01',
-    '2020-09-01',
-    '2020-11-01',
-    '2020-12-01',
-
-    '2021-03-01',
-    '2021-05-01',
-    '2021-06-01',
-    '2021-07-01',
-    '2021-08-01',
-    '2021-09-01',
-    '2021-10-01',
-    '2021-11-01',
-    '2021-12-01',
-
-    '2022-01-01',
-    '2022-02-22',
-    '2022-02-23',
-    '2022-02-26',
-    '2022-02-27',
-    '2022-03-03',
-    '2022-03-05',
-    '2022-03-10',
-    '2022-03-12',
-    '2022-03-20',
-    '2022-03-22',
-    '2022-03-23',
-    '2022-03-25',
-    '2022-03-26',
-    '2022-04-02',
-    '2022-04-16',
-]
 
 const driver = await new Builder()
     .forBrowser('chrome')
@@ -132,14 +14,17 @@ const driver = await new Builder()
     .build()
 
 try {
-    await prepareMapView()
+    // await prepareMapView()
+
+    const { dates } = JSON.parse(fs.readFileSync('./config.json'));
 
     const mapDimensions = await getMapDimensions()
-    for (let index = 0; index < DATES.length; index++) {
-        const isoDate = DATES[index]
-        const [year, month, day] = isoDate.split('-', 3);
+    for (let index = 0; index < dates.length; index++) {
+        const line = dates[index]
+        const [date] = line.split(' ') // Chop of tour name
+        const [year, month, day] = date.split('-', 3);
         await selectEndDate(`${month}/${day}/${year}`, index)
-        await takeMapScreenshot(mapDimensions, isoDate, index)
+        await takeMapScreenshot(mapDimensions, line, index)
     }
 
     /*
@@ -312,8 +197,9 @@ async function getMapDimensions() {
     }
 }
 
-async function takeMapScreenshot(mapDimensions, isoDate, counter) {
-    console.log(`---> take screenshot of ${isoDate} with dimensions`, mapDimensions)
+async function takeMapScreenshot(mapDimensions, label, counter) {
+    console.log(`---> take screenshot of '${label}' with dimensions`, mapDimensions)
+
     const base64Shot = await driver.takeScreenshot()
     const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
     const imageBuffer = Buffer.from(base64Image, 'base64')
@@ -321,7 +207,7 @@ async function takeMapScreenshot(mapDimensions, isoDate, counter) {
     const image = await jimp.read(imageBuffer)
     image.crop(mapDimensions.x, mapDimensions.y, mapDimensions.w, mapDimensions.h)
     const font = await jimp.loadFont(jimp.FONT_SANS_32_BLACK)
-    image.print(font, 20, mapDimensions.h - 50, isoDate)
+    image.print(font, 20, mapDimensions.h - 50, label)
     const fileName = `screenshots/img${String(counter).padStart(3, '0')}.png`
     await image.writeAsync(fileName)
 }

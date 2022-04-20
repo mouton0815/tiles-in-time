@@ -4,6 +4,6 @@ dist/
 yarn.lock
 yarn-error.log
 node_modules/
-screenshots/
+screenshots*/
 cypress/*
 !cypress/integration/
