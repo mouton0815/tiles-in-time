@@ -21,7 +21,7 @@ try {
     const mapDimensions = await getMapDimensions()
     for (let index = 0; index < dates.length; index++) {
         const line = dates[index]
-        const [date] = line.split(' ') // Chop of tour name
+        const [date] = line.split(' ') // Chop-off the optional tour name
         const [year, month, day] = date.split('-', 3);
         await selectEndDate(`${month}/${day}/${year}`, index)
         await takeMapScreenshot(mapDimensions, line, index)
