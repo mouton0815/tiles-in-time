@@ -24,17 +24,13 @@ const DATES = [
     '2011-08-01',
     '2011-09-01',
     '2011-10-01',
-    '2011-11-01',
     '2011-12-01',
 
-    /*
     '2012-03-01',
-    '2012-04-01',
     '2012-05-01',
     '2012-06-01',
     '2012-07-01',
     '2012-08-01',
-    '2012-09-01',
     '2012-10-01',
 
     '2013-06-01',
@@ -53,7 +49,6 @@ const DATES = [
     '2014-12-01',
 
     '2015-04-01',
-    '2015-05-01',
     '2015-06-01',
     '2015-07-01',
     '2015-08-01',
@@ -65,7 +60,6 @@ const DATES = [
     '2016-05-01',
     '2016-06-01',
     '2016-08-01',
-    '2016-09-01',
     '2016-10-01',
     '2016-11-01',
 
@@ -82,7 +76,6 @@ const DATES = [
     '2018-05-01',
     '2018-06-01',
     '2018-07-01',
-    '2018-08-01',
     '2018-09-01',
     '2018-10-01',
     '2018-11-01',
@@ -100,13 +93,10 @@ const DATES = [
 
     '2020-04-01',
     '2020-05-01',
-    '2020-06-01',
     '2020-07-01',
     '2020-09-01',
-    '2020-10-01',
     '2020-11-01',
     '2020-12-01',
-    */
 
     '2021-03-01',
     '2021-05-01',
@@ -332,7 +322,7 @@ async function takeMapScreenshot(mapDimensions, isoDate, counter) {
     image.crop(mapDimensions.x, mapDimensions.y, mapDimensions.w, mapDimensions.h)
     const font = await jimp.loadFont(jimp.FONT_SANS_32_BLACK)
     image.print(font, 20, mapDimensions.h - 50, isoDate)
-    const fileName = `img${String(counter).padStart(3, '0')}.png`
+    const fileName = `screenshots/img${String(counter).padStart(3, '0')}.png`
     await image.writeAsync(fileName)
 }
 

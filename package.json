@@ -7,11 +7,15 @@
   "author": "Torsten Schlieder <torsten.schlieder@gmx.net>",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "postinstall": "mkdirp screenshots"
+  },
   "dependencies": {
     "chromedriver": "^100.0.0",
-    "jimp": "^0.16.1"
+    "jimp": "^0.16.1",
+    "selenium-webdriver": "^4.1.1"
   },
   "devDependencies": {
-    "selenium-webdriver": "^4.1.1"
+    "mkdirp": "^1.0.4"
   }
 }
