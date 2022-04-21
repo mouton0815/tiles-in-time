@@ -1,6 +1,9 @@
 {
-  "startDate": "2021-12-01",
-  "endDate": "2022-05-01",
+  "username": "<your-strava-username>",
+  "password": "<your-strava-password>",
+  "chromePort": "9222",
+  "startDate": "2010-08",
+  "endDate": "2011-01",
   "dates": [
     "2010-04-01 Von Arbeit via Möckern",
     "2010-04-07 Von Arbeit via Osten",

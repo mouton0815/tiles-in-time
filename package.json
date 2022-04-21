@@ -2,7 +2,7 @@
   "name": "tiles-in-time",
   "description": "Creates snapshops of the VeloViewer Activities screen given a list of dates",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/main.js",
   "repository": "https://github.com/mouton0815/tiles-in-time.git",
   "author": "Torsten Schlieder <torsten.schlieder@gmx.net>",
   "license": "MIT",

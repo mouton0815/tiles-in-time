@@ -1,5 +1,4 @@
 import chrome from 'chromedriver'
-import chrome from 'chromedriver'
 import  { Builder, By, Key, until } from 'selenium-webdriver'
 
 const driver = await new Builder().forBrowser('chrome').build()

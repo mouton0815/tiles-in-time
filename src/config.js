@@ -1,14 +1,19 @@
 import fs from 'fs'
 
+export function readConfig() {
+    const { username, password, chromePort, dates, startDate, endDate } = JSON.parse(fs.readFileSync('./config.json'))
+    const datesArray = createDatesArray(dates, startDate, endDate)
+    return { username, password, chromePort, dates: datesArray }
+}
+
 /**
  * Reads the config file and returns an array of date strings with optional tour titles.
  * If a start or end date is given, selects that range from the array. If both start and end date
  * is given, but no array, then the array is created by adding a date for the 1st of every month
  * in the date range.
  */
-export function readDatesConfig() {
+function createDatesArray(dates, startDate, endDate) {
     // TODO: More correctness checks (including syntax of all date strings)
-    const { dates, startDate, endDate } = JSON.parse(fs.readFileSync('./config.json'))
     if (dates) {
         // The list of dates is explicitly given
         if (!Array.isArray(dates) || dates.length === 0) {

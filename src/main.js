@@ -1,44 +1,36 @@
 // chrome --remote-debugging-port=9222 --user-data-dir="C:\tmp\ChromeProfile"
 // C:\Tools\ffmpeg-n5.0\bin\ffmpeg.exe -framerate 0.5 -i img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
+// https://trac.ffmpeg.org/wiki/Slideshow
 
 import 'chromedriver'
 import chrome from 'selenium-webdriver/chrome.js'
 import  { Builder, By, until } from 'selenium-webdriver'
 import jimp from 'jimp'
-import fs from 'fs'
+import { readConfig } from './config.js'
 
+
+const { username, password, dates, chromePort } = readConfig()
+const chromeOptions = chromePort ? new chrome.Options().debuggerAddress(`127.0.0.1:${chromePort}`) : null
 
 const driver = await new Builder()
     .forBrowser('chrome')
-    .setChromeOptions(new chrome.Options().debuggerAddress('127.0.0.1:9222'))
+    .setChromeOptions(chromeOptions)
     .build()
 
 try {
-    // await prepareMapView()
-
-    const { dates } = JSON.parse(fs.readFileSync('./config.json'));
+    await loadPage()
+    // await login() // TODO: Login only if necessary
+    await prepareMapView()
 
     const mapDimensions = await getMapDimensions()
     for (let index = 0; index < dates.length; index++) {
+        // TODO: Put loop content into a function
         const line = dates[index]
         const [date] = line.split(' ') // Chop-off the optional tour name
         const [year, month, day] = date.split('-', 3);
         await selectEndDate(`${month}/${day}/${year}`, index)
         await takeMapScreenshot(mapDimensions, line, index)
     }
-
-    /*
-    for (let year = 2010; year <= 2021; year++) {
-        await selectEndDate(`12/31/${year}`)
-        await takeMapScreenshot(mapDimensions, `${year}-12.png`)
-        await sleep(1000)
-    }
-    for (let month = 1; month <= 4; month++) {
-        await selectEndDate(`${month}/31/2022`)
-        await takeMapScreenshot(mapDimensions, `2022-${month}.png`)
-        await sleep(1000)
-    }
-    */
 } finally {
     await driver.quit()
 }
@@ -47,7 +39,6 @@ try {
  * Loads VeloViewer page and opens the map view
  */
 async function prepareMapView() {
-    await loadPage()
     await openActivitiesTab()
     await sleep(3000) // Let the filters bar collapse automatically // TODO: Can this be done better?
 
@@ -79,9 +70,25 @@ async function loadPage() {
     console.log('---> Page loaded')
 }
 
+async function login() {
+    const updateButton = await getElementByPath('(//a[@href="/update"])[1]')
+    await updateButton.click()
+
+    // VeloViewer now routes to Strava
+    await driver.wait(until.titleContains('Strava'))
+    const usernameField = await getElementById('email')
+    await usernameField.sendKeys(username)
+    const passwordField = await getElementById('password')
+    await passwordField.sendKeys(password)
+    const loginButton = await getElementById('login-button')
+    await loginButton.click()
+
+    await driver.wait(until.titleContains('VeloViewer'))
+}
+
 async function openActivitiesTab() {
     // Click on the "activities" menu entry
-    const activitiesTab = await driver.wait(until.elementLocated(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]')))
+    const activitiesTab = await driver.wait(until.elementLocated(By.xpath('//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]'))) // TODO: Replace by getElementByPath
     await activitiesTab.click()
     console.log('---> Activities opened')
 }
@@ -111,7 +118,7 @@ async function hideContainer(checkboxId, containerId) {
 }
 
 async function triggerMapControl(controlTitle, enableControl) {
-    const control = await driver.wait(until.elementLocated(By.xpath(`//a[contains(@title, '${controlTitle}')]`)))
+    const control = await driver.wait(until.elementLocated(By.xpath(`//a[contains(@title, '${controlTitle}')]`))) // TODO: Replace by getElementByPath
     // console.log(`---> '${controlTitle}' is located`)
     const backgroundColor = await control.getCssValue('background-color')
     // console.log(`---> '${controlTitle}' color: ${backgroundColor}`)
@@ -156,7 +163,7 @@ async function clickRideCheckbox(targetState) {
     let attempts = 0
     while (true) {
         try {
-            const checkbox = await driver.wait(until.elementLocated(By.xpath("//input[@value='Ride']")))
+            const checkbox = await driver.wait(until.elementLocated(By.xpath("//input[@value='Ride']"))) // TODO: Replace by getElementByPath
             let isSelected = await checkbox.isSelected()
             // console.log('---> Checkbox selected:', isSelected)
             if (targetState === isSelected) {
@@ -171,12 +178,6 @@ async function clickRideCheckbox(targetState) {
                 break
             }
         } catch (e) {
-            /*
-            ++attempts
-            if (attempts >= 1) {
-                console.log(`---> Caught, attempt ${attempts + 1}`)
-            }
-            */
             if (++attempts === 10) {
                 throw new Error('Selecting the "Ride" checkbox failed after 10 attempts')
             }
@@ -213,9 +214,11 @@ async function takeMapScreenshot(mapDimensions, label, counter) {
 }
 
 async function getElementById(id) {
-    const element = await driver.wait(until.elementLocated(By.id(id)))
-    // console.log(`---> ${id} located`)
-    return element
+    return await driver.wait(until.elementLocated(By.id(id)))
+}
+
+async function getElementByPath(path) {
+    return await driver.wait(until.elementLocated(By.xpath(path)))
 }
 
 async function sleep(time) {
