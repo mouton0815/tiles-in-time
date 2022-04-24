@@ -73,9 +73,9 @@ async function prepareMapView() {
     await hideContainer('viewChartCheckBox', 'chartContainer')
     await hideContainer('viewPhotosCheckBox', 'photosContainer')
 
-    await openFilters()
-
     await deselectAutoZoom()
+
+    await openFilters()
 
     // Deselect photos on map
     await triggerMapControl('View photos', false)
@@ -94,10 +94,11 @@ async function deselectAutoZoom() {
 
     const autoZoomCheckbox = await getElementById('mapAutoZoomCheckBox')
     await clickCheckbox(autoZoomCheckbox, false)
-    await sleep(500) // Do not close model window too fast TODO: Necessary?
+    await sleep(1000) // Do not close model window too fast TODO: Necessary?
 
     const closeButton = await getElementByPath('//button[text()="Close"]')
     await closeButton.click()
+    await sleep(1000) // Do not close model window too fast TODO: Necessary?
 }
 
 async function openActivitiesTab() {
@@ -155,6 +156,7 @@ async function openFilters() {
     const collapseFilter = await getElementById('collapseFilter')
     await driver.wait(until.elementIsVisible(collapseFilter))
     console.log('---> Filters visible')
+    await sleep(1000) // TODO: Remove
 }
 
 async function closeFilters() {
