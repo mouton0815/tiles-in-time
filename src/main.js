@@ -18,9 +18,9 @@ const driver = await new Builder()
     .build()
 
 try {
-    await loadPage()
+    // await loadPage()
     // await login() // TODO: Login only if necessary
-    await prepareMapView()
+    // await prepareMapView()
 
     const mapDimensions = await getMapDimensions()
     for (let index = 0; index < dates.length; index++) {
@@ -35,9 +35,32 @@ try {
     await driver.quit()
 }
 
-/**
- * Loads VeloViewer page and opens the map view
- */
+async function loadPage() {
+    // Load page and wait for title
+    await driver.get('https://veloviewer.com')
+    await driver.wait(until.titleContains('VeloViewer'))
+    console.log('---> Page loaded')
+}
+
+async function login() {
+    const updateButton = await getElementByPath('(//a[@href="/update"])[1]')
+    console.log('---> Update button located')
+    await updateButton.click()
+
+    // VeloViewer now routes to Strava
+    await driver.wait(until.titleContains('Strava'))
+    const usernameField = await getElementById('email')
+    await usernameField.sendKeys(username)
+    await sleep(1000)
+    const passwordField = await getElementById('password')
+    await passwordField.sendKeys(password)
+    await sleep(1000)
+    const loginButton = await getElementById('login-button')
+    await loginButton.click()
+
+    await driver.wait(until.titleContains('VeloViewer'))
+}
+
 async function prepareMapView() {
     await openActivitiesTab()
     await sleep(3000) // Let the filters bar collapse automatically // TODO: Can this be done better?
@@ -52,6 +75,8 @@ async function prepareMapView() {
 
     await openFilters()
 
+    await deselectAutoZoom()
+
     // Deselect photos on map
     await triggerMapControl('View photos', false)
 
@@ -63,27 +88,16 @@ async function prepareMapView() {
     await triggerMapControl('View Explorer Max Cluster', true)
 }
 
-async function loadPage() {
-    // Load page and wait for title
-    await driver.get('https://veloviewer.com')
-    await driver.wait(until.titleContains('VeloViewer'))
-    console.log('---> Page loaded')
-}
+async function deselectAutoZoom() {
+    const mapControlButton = await selectMapControl('Map settings')
+    await mapControlButton.click()
 
-async function login() {
-    const updateButton = await getElementByPath('(//a[@href="/update"])[1]')
-    await updateButton.click()
+    const autoZoomCheckbox = await getElementById('mapAutoZoomCheckBox')
+    await clickCheckbox(autoZoomCheckbox, false)
+    await sleep(500) // Do not close model window too fast TODO: Necessary?
 
-    // VeloViewer now routes to Strava
-    await driver.wait(until.titleContains('Strava'))
-    const usernameField = await getElementById('email')
-    await usernameField.sendKeys(username)
-    const passwordField = await getElementById('password')
-    await passwordField.sendKeys(password)
-    const loginButton = await getElementById('login-button')
-    await loginButton.click()
-
-    await driver.wait(until.titleContains('VeloViewer'))
+    const closeButton = await getElementByPath('//button[text()="Close"]')
+    await closeButton.click()
 }
 
 async function openActivitiesTab() {
@@ -118,7 +132,7 @@ async function hideContainer(checkboxId, containerId) {
 }
 
 async function triggerMapControl(controlTitle, enableControl) {
-    const control = await driver.wait(until.elementLocated(By.xpath(`//a[contains(@title, '${controlTitle}')]`))) // TODO: Replace by getElementByPath
+    const control = await selectMapControl(controlTitle)
     // console.log(`---> '${controlTitle}' is located`)
     const backgroundColor = await control.getCssValue('background-color')
     // console.log(`---> '${controlTitle}' color: ${backgroundColor}`)
@@ -128,6 +142,10 @@ async function triggerMapControl(controlTitle, enableControl) {
         await control.click()
         await sleep(300)
     }
+}
+
+async function selectMapControl(controlTitle, enableControl) {
+    return await driver.wait(until.elementLocated(By.xpath(`//a[contains(@title, '${controlTitle}')]`))) // TODO: Replace by getElementByPath
 }
 
 async function openFilters() {
@@ -160,6 +178,7 @@ async function selectEndDate(dateStr) {
 }
 
 async function clickRideCheckbox(targetState) {
+    // TODO: Replace loop by function clickCheckbox
     let attempts = 0
     while (true) {
         try {
@@ -181,6 +200,33 @@ async function clickRideCheckbox(targetState) {
             if (++attempts === 10) {
                 throw new Error('Selecting the "Ride" checkbox failed after 10 attempts')
             }
+            await sleep(100) // Sleep a bit for next attempt
+        }
+    }
+}
+
+async function clickCheckbox(checkbox, targetState) {
+    let attempts = 0
+    while (true) {
+        try {
+            let isSelected = await checkbox.isSelected()
+            console.log('---> Checkbox selected:', isSelected)
+            if (targetState === isSelected) {
+                console.log('---> Checkbox already in target state')
+                break
+            }
+            await checkbox.click()
+            console.log(`---> Clicked, attempt ${attempts + 1}`)
+            isSelected = await checkbox.isSelected()
+            console.log('---> Checkbox selected now:', isSelected)
+            if (targetState === isSelected) {
+                break
+            }
+        } catch (e) {
+            if (++attempts === 10) {
+                throw new Error('Checkbox selection failed after 10 attempts')
+            }
+            console.log(`---> Checkbox click attempt ${attempts} failed, retrying`)
             await sleep(100) // Sleep a bit for next attempt
         }
     }
