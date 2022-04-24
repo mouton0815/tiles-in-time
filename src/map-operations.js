@@ -48,7 +48,7 @@ async function triggerMapControl(driver, controlTitle, enableControl) {
     if (expectedColor !== backgroundColor) {
         console.log(`---> '${controlTitle}': CLICK`)
         await control.click()
-        await sleep(300)
+        await sleep(500)
     }
 }
 

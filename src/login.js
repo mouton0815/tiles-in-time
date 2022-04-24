@@ -19,4 +19,5 @@ export async function login(driver, username, password) {
     await loginButton.click()
 
     await driver.wait(until.titleContains('VeloViewer'))
+    console.log('---> Returned to VeloViewer')
 }

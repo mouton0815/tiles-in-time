@@ -13,9 +13,17 @@ export async function loadPage(driver) {
 }
 
 export async function preparePage(driver) {
-    await openActivitiesTab(driver)
+    await openTab(driver, 'activities', 3000)
     await prepareMapContainer(driver)
     await disableAutoZoom(driver)
+
+    // There is a really strange VeloViewer bug: When the "Map Settings" modal window was opened once (to e.g.
+    // disable the auto zoom as done above), then the selection of certain routes leads to strange zoom-in effects.
+    // One way to avoid this is to open another tab (here: "update") after closing the modal window and then to
+    // return to the "activities" tab again.
+    await openTab(driver, 'update', 2000)
+    await openTab(driver, 'activities', 3000)
+
     await openFilters(driver)
     await prepareMap(driver)
 }
@@ -26,4 +34,19 @@ async function openActivitiesTab(driver) {
     await activitiesTab.click()
     console.log('---> Activities opened')
     await sleep(3000) // Let the filters bar collapse automatically // TODO: Can this be done better?
+}
+
+async function openUpdateTab(driver) {
+    // Click on the "activities" menu entry
+    const activitiesTab = await getElementByPath(driver, '//ul[@id="myTabs"]/li/a[contains(@href, "/update")]')
+    await activitiesTab.click()
+    console.log('---> Update opened')
+    await sleep(3000) // Let the filters bar collapse automatically // TODO: Can this be done better?
+}
+
+async function openTab(driver, tab, delay) {
+    const activitiesTab = await getElementByPath(driver, `//ul[@id="myTabs"]/li/a[contains(@href, "/${tab}")]`)
+    await activitiesTab.click()
+    console.log(`---> Tab '${tab}' opened`)
+    await sleep(delay) // Let the filters bar collapse automatically // TODO: Can this be done better?
 }

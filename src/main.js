@@ -22,7 +22,7 @@ const driver = await new Builder()
 
 try {
     await loadPage(driver)
-    // await login(driver, username, password) // TODO: Login only if necessary
+    await login(driver, username, password) // TODO: Login only if necessary
     await preparePage(driver)
 
     const dimensions = await getMapDimensions(driver)
