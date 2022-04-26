@@ -1,0 +1,15 @@
+{
+  "username": "<your-strava-username>",
+  "password": "<your-strava-password>",
+  "chromePort": "9222",
+  "startDate": "2022-02-01",
+  "endDate": "2022-05-31",
+  "dates": [
+    "2022-01-16 My first ride (excluded by startDate)",
+    "2022-02-03 My second ride",
+    "2022-02-17",
+    "2022-03-31 A nice one",
+    "2022-04-15 Rainy",
+    "2022-06-01 Summer begins (excluded by endDate)",
+  ]
+}
