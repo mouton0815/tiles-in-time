@@ -11,7 +11,6 @@ export async function openFilters(driver) {
     const collapseFilter = await getElementById(driver, 'collapseFilter')
     await driver.wait(until.elementIsVisible(collapseFilter))
     console.log('---> Filters visible')
-    await sleep(2000) // TODO: Remove
 }
 
 export async function closeFilters(driver) {

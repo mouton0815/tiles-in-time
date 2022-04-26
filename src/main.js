@@ -22,15 +22,17 @@ const driver = await new Builder()
 
 try {
     await loadPage(driver)
-    await login(driver, username, password) // TODO: Login only if necessary
+    await login(driver, username, password)
     await preparePage(driver)
 
+    /*
     const dimensions = await getMapDimensions(driver)
     for (let index = 0; index < dates.length; index++) {
         const line = dates[index]
         await selectEndDate(driver, isoToUkDate(line), index)
         await takeScreenshot(driver, dimensions, line, index)
     }
+    */
 } finally {
     await driver.quit()
 }

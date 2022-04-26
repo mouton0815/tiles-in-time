@@ -28,22 +28,6 @@ export async function preparePage(driver) {
     await prepareMap(driver)
 }
 
-async function openActivitiesTab(driver) {
-    // Click on the "activities" menu entry
-    const activitiesTab = await getElementByPath(driver, '//ul[@id="myTabs"]/li/a[contains(@href, "/activities")]')
-    await activitiesTab.click()
-    console.log('---> Activities opened')
-    await sleep(3000) // Let the filters bar collapse automatically // TODO: Can this be done better?
-}
-
-async function openUpdateTab(driver) {
-    // Click on the "activities" menu entry
-    const activitiesTab = await getElementByPath(driver, '//ul[@id="myTabs"]/li/a[contains(@href, "/update")]')
-    await activitiesTab.click()
-    console.log('---> Update opened')
-    await sleep(3000) // Let the filters bar collapse automatically // TODO: Can this be done better?
-}
-
 async function openTab(driver, tab, delay) {
     const activitiesTab = await getElementByPath(driver, `//ul[@id="myTabs"]/li/a[contains(@href, "/${tab}")]`)
     await activitiesTab.click()

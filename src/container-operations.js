@@ -14,23 +14,21 @@ export async function prepareMapContainer(driver) {
 async function showContainer(driver, checkboxId, containerId) {
     const container = await getElementById(driver, containerId)
     const displayed = await container.isDisplayed()
-    // console.log(`---> ${containerId} displayed: ${displayed}`)
     if (!displayed) {
         const checkbox = await getElementById(driver, checkboxId)
         await checkbox.click()
         await driver.wait(until.elementIsVisible(container))
-        console.log(`---> ${containerId} visible`)
+        console.log(`---> Container '${containerId}' visible`)
     }
 }
 
 async function hideContainer(driver, checkboxId, containerId) {
     const container = await getElementById(driver, containerId)
     const displayed = await container.isDisplayed()
-    // console.log(`---> ${containerId} displayed: ${displayed}`)
     if (displayed) {
         const checkbox = await getElementById(driver, checkboxId)
         await checkbox.click()
         await driver.wait(until.elementIsNotVisible(container))
-        console.log(`---> ${containerId} hidden`)
+        console.log(`---> Container '${containerId}' hidden`)
     }
 }
