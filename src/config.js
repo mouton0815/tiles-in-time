@@ -1,9 +1,9 @@
 import fs from 'fs'
 
 export function readConfig() {
-    const { username, password, chromePort, dates, startDate, endDate } = JSON.parse(fs.readFileSync('./config.json'))
+    const { mode = 2, username, password, chromePort, dates, startDate, endDate } = JSON.parse(fs.readFileSync('./config.json'))
     const datesArray = createDatesArray(dates, startDate, endDate)
-    return { username, password, chromePort, dates: datesArray }
+    return { mode, username, password, chromePort, dates: datesArray }
 }
 
 /**

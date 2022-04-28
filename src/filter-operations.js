@@ -1,4 +1,4 @@
-import {By, until} from 'selenium-webdriver'
+import { By, until } from 'selenium-webdriver'
 import { getElementById } from './locators.js'
 import { clickCheckbox } from './checkbox.js'
 

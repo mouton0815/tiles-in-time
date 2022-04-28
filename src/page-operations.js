@@ -2,7 +2,7 @@ import { until } from 'selenium-webdriver'
 import { sleep } from './utils.js'
 import { prepareMapContainer } from './container-operations.js'
 import { openFilters } from './filter-operations.js'
-import { disableAutoZoom, prepareMap } from './map-operations.js'
+import { disableAutoZoom } from './map-operations.js'
 import { getElementByPath } from './locators.js'
 
 export async function loadPage(driver) {
@@ -25,7 +25,6 @@ export async function preparePage(driver) {
     await openTab(driver, 'activities', 3000)
 
     await openFilters(driver)
-    await prepareMap(driver)
 }
 
 async function openTab(driver, tab, delay) {

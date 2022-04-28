@@ -7,13 +7,14 @@ import chrome from 'selenium-webdriver/chrome.js'
 import  { Builder } from 'selenium-webdriver'
 import { createFolder, isoToUkDate } from './utils.js'
 import { readConfig } from './config.js'
-import { loadPage, preparePage } from './page-operations.js'
 import { login } from './login.js'
+import { loadPage, preparePage } from './page-operations.js'
+import { prepareMap } from './map-operations.js'
 import { selectEndDate } from './filter-operations.js'
 import { takeScreenshot } from './screenshot.js'
 import { getMapDimensions } from './map-operations.js'
 
-const { username, password, dates, chromePort } = readConfig()
+const { mode, username, password, dates, chromePort } = readConfig()
 const chromeOptions = chromePort ? new chrome.Options().debuggerAddress(`127.0.0.1:${chromePort}`) : null
 
 const driver = await new Builder()
@@ -22,9 +23,14 @@ const driver = await new Builder()
     .build()
 
 try {
-    await loadPage(driver)
-    await login(driver, username, password)
-    await preparePage(driver)
+    if (mode <= 1) {
+        await loadPage(driver)
+        await login(driver, username, password)
+        await preparePage(driver)
+    }
+    if (mode <= 2) {
+        await prepareMap(driver)
+    }
 
     createFolder('screenshots')
     const dimensions = await getMapDimensions(driver)

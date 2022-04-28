@@ -1,4 +1,5 @@
 {
+  "mode": 2
   "username": "<your-strava-username>",
   "password": "<your-strava-password>",
   "chromePort": "9222",
