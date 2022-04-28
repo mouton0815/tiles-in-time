@@ -1,5 +1,4 @@
 import {By, until} from 'selenium-webdriver'
-import { sleep } from './sleep.js'
 import { getElementById } from './locators.js'
 import { clickCheckbox } from './checkbox.js'
 

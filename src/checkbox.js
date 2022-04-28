@@ -1,4 +1,4 @@
-import { sleep } from './sleep.js'
+import { sleep } from './utils.js'
 import { until } from 'selenium-webdriver'
 
 /**

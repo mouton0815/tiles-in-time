@@ -1,5 +1,5 @@
 import { By } from 'selenium-webdriver'
-import { sleep } from './sleep.js'
+import { sleep } from './utils.js'
 import { getElementById, getElementByPath } from './locators.js'
 import { clickCheckbox } from './checkbox.js'
 

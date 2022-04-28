@@ -1,5 +1,5 @@
 import { By, until } from 'selenium-webdriver'
-import { sleep } from './sleep.js'
+import { sleep } from './utils.js'
 import { getElementById } from './locators.js'
 
 export async function login(driver, username, password) {

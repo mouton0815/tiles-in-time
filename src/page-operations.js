@@ -1,5 +1,5 @@
 import { until } from 'selenium-webdriver'
-import { sleep } from './sleep.js'
+import { sleep } from './utils.js'
 import { prepareMapContainer } from './container-operations.js'
 import { openFilters } from './filter-operations.js'
 import { disableAutoZoom, prepareMap } from './map-operations.js'
