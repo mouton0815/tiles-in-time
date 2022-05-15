@@ -7,6 +7,9 @@
   "author": "Torsten Schlieder <torsten.schlieder@gmx.net>",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "start": "node src/main.js"
+  },
   "dependencies": {
     "chromedriver": "^100.0.0",
     "jimp": "^0.16.1",

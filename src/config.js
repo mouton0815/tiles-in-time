@@ -1,7 +1,11 @@
 import fs from 'fs'
+import { errorExit } from './utils.js'
 
 export function readConfig() {
     const { mode = 2, username, password, chromePort, dates, startDate, endDate } = JSON.parse(fs.readFileSync('./config.json'))
+    if (mode > 1 && !chromePort) {
+        errorExit(`Mode ${mode} requires "chromePort" to be defined (i.e. connect to a running Chrome)`)
+    }
     const datesArray = createDatesArray(dates, startDate, endDate)
     return { mode, username, password, chromePort, dates: datesArray }
 }
@@ -10,7 +14,7 @@ export function readConfig() {
  * Reads the config file and returns an array of date strings with optional tour titles.
  * If a start or end date is given, selects that range from the array. If both start and end date
  * is given, but no array, then the array is created by adding a date for the 1st of every month
- * in the date range.
+ * in the date range. It is guaranteed that the returned array is non-empty.
  */
 function createDatesArray(dates, startDate, endDate) {
     // TODO: More correctness checks (including syntax of all date strings)
@@ -23,8 +27,8 @@ function createDatesArray(dates, startDate, endDate) {
         let startIndex = 0
         if (startDate) {
             for (let index = 0; index < dates.length; index++) {
-                // Because all dates are ISO 8601 dates, we can use string comparison
-                if (startDate <= dates[index]) {
+                const [date] = dates[index].split(' ') // Chop-off the optional tour name
+                if (startDate <= date) { // Because all dates are ISO 8601 dates, we can use string comparison
                     startIndex = index
                     break
                 }
@@ -33,17 +37,22 @@ function createDatesArray(dates, startDate, endDate) {
         let endIndex = dates.length
         if (endDate) {
             for (let index = dates.length - 1; index >= 0; index--) {
-                if (endDate >= dates[index]) {
+                const [date] = dates[index].split(' ')
+                if (endDate >= date) {
                     endIndex = index + 1
                     break
                 }
             }
         }
-        return dates.slice(startIndex, endIndex)
+        const dateList = dates.slice(startIndex, endIndex)
+        if (dateList.length === 0) {
+            errorExit('The "startDate" - "endDate" range yields an empty list')
+        }
+        return dateList
 
     } else if (startDate && endDate) {
         // The date list will be generated from range [startDate, endDate]
-        let dates = []
+        const dateList = []
         const [startYear, startMonth] = splitDate(startDate)
         const [endYear, endMonth] = splitDate(endDate)
         if (startYear === endYear) {
@@ -52,7 +61,7 @@ function createDatesArray(dates, startDate, endDate) {
                 errorExit('Start month must be smaller than end month')
             }
             for (let month = startMonth; month <= endMonth; month++) {
-                dates.push(formatDate(startYear, month))
+                dateList.push(formatDate(startYear, month))
             }
         } else {
             // Generate dates for the start year, all full years, and the end year
@@ -60,18 +69,21 @@ function createDatesArray(dates, startDate, endDate) {
                 errorExit('Start year must be smaller than end year')
             }
             for (let month = startMonth; month <= 12; month++) {
-                dates.push(formatDate(startYear, month))
+                dateList.push(formatDate(startYear, month))
             }
             for (let year = startYear + 1; year < endYear; year++) {
                 for (let month = 1; month <= 12; month++) {
-                    dates.push(formatDate(year, month))
+                    dateList.push(formatDate(year, month))
                 }
             }
             for (let month = 1; month <= endMonth; month++) {
-                dates.push(formatDate(endYear, month))
+                dateList.push(formatDate(endYear, month))
             }
         }
-        return dates
+        if (dateList.length === 0) {
+            errorExit('The "startDate" - "endDate" range yields an empty list')
+        }
+        return dateList
 
     } else {
         errorExit('Invalid config file (either "dates" or both "startDate" and "endDate" must be provided)')
@@ -85,9 +97,4 @@ function splitDate(dateString) {
 
 function formatDate(year, month) {
     return `${year}-${String(month).padStart(2, '0')}-01`
-}
-
-function errorExit(message) {
-    console.error(message)
-    process.exit(-1)
 }

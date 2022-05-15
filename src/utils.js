@@ -6,6 +6,11 @@ export async function sleep(time) {
     await new Promise(resolve => setTimeout(resolve, time))
 }
 
+export function errorExit(message) {
+    console.error(message)
+    process.exit(-1)
+}
+
 export function isoToUkDate(isoDate) {
     const [date] = isoDate.split(' ') // Chop-off the optional tour name
     const [year, month, day] = date.split('-', 3)

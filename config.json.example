@@ -1,8 +1,8 @@
 {
   "mode": 2,
+  "chromePort": "9222",
   "username": "<your-strava-username>",
   "password": "<your-strava-password>",
-  "chromePort": "9222",
   "startDate": "2022-02-01",
   "endDate": "2022-05-31",
   "dates": [

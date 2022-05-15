@@ -1,4 +1,5 @@
 import { By, until } from 'selenium-webdriver'
+import { errorExit } from './utils.js'
 import { getElementById } from './locators.js'
 import { clickCheckbox } from './checkbox.js'
 
@@ -23,6 +24,9 @@ export async function closeFilters(driver) {
 
 export async function selectEndDate(driver, dateStr) {
     const dateField = await getElementById(driver, 'max0')
+    if (!(await dateField.isDisplayed())) {
+        errorExit('Date field is not visible (please click on "Show Filters" to open the toolbar)')
+    }
     await dateField.clear()
     await dateField.sendKeys(dateStr)
 
