@@ -7,13 +7,14 @@ import { clickCheckbox } from './checkbox.js'
 export async function getMapDimensions(driver) {
     const container = await getElementById(driver, 'mapContainer')
     const viewPort = await container.getRect()
-    // console.log('---> map viewport raw:', viewPort)
-    return  {
+    const dimensions = {
         x: Math.ceil(viewPort.x),
         y: Math.ceil(viewPort.y),
         w: Math.floor(viewPort.width),
         h: Math.floor(viewPort.height)
     }
+    console.log('---> Use screenshot viewport', dimensions)
+    return dimensions
 }
 
 export async function disableAutoZoom(driver) {

@@ -37,7 +37,6 @@ try {
 
     createFolder('screenshots')
     const dimensions = await getMapDimensions(driver)
-    console.log('---> Use screenshot viewport', dimensions)
     for (let index = 0; index < dates.length; index++) {
         const line = dates[index]
         await selectEndDate(driver, isoToUkDate(line))
