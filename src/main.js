@@ -15,7 +15,9 @@ import { takeScreenshot } from './screenshot.js'
 import { getMapDimensions } from './map-operations.js'
 
 const { mode, username, password, dates, chromePort } = readConfig()
-const chromeOptions = chromePort ? new chrome.Options().debuggerAddress(`127.0.0.1:${chromePort}`) : null
+const chromeOptions = chromePort
+    ? new chrome.Options().debuggerAddress(`127.0.0.1:${chromePort}`)
+    : new chrome.Options().addArguments('--start-maximized')
 
 const driver = await new Builder()
     .forBrowser('chrome')
