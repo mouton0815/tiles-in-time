@@ -11,8 +11,13 @@ export function errorExit(message) {
     process.exit(-1)
 }
 
-export function isoToUkDate(isoDate) {
-    const [date] = isoDate.split(' ') // Chop-off the optional tour name
+export function extractDate(isoDateLine) {
+    const [date] = isoDateLine.split(' ') // Chop-off the optional tour name
+    return date
+}
+
+export function isoToUkDate(isoDateLine) {
+    const date = extractDate(isoDateLine)
     const [year, month, day] = date.split('-', 3)
     return `${month}/${day}/${year}`
 }

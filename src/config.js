@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { errorExit } from './utils.js'
+import { errorExit, extractDate } from './utils.js'
 
 export function readConfig() {
     const { mode = 2, username, password, chromePort, dates, startDate, endDate } = JSON.parse(fs.readFileSync('./config.json'))
@@ -27,7 +27,7 @@ function createDatesArray(dates, startDate, endDate) {
         let startIndex = 0
         if (startDate) {
             for (let index = 0; index < dates.length; index++) {
-                const [date] = dates[index].split(' ') // Chop-off the optional tour name
+                const date = extractDate(dates[index]) // Chop-off the optional tour name
                 if (startDate <= date) { // Because all dates are ISO 8601 dates, we can use string comparison
                     startIndex = index
                     break
@@ -37,7 +37,7 @@ function createDatesArray(dates, startDate, endDate) {
         let endIndex = dates.length
         if (endDate) {
             for (let index = dates.length - 1; index >= 0; index--) {
-                const [date] = dates[index].split(' ')
+                const date = extractDate(dates[index])
                 if (endDate >= date) {
                     endIndex = index + 1
                     break
