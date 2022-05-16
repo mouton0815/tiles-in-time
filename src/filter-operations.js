@@ -5,21 +5,16 @@ import { clickCheckbox } from './checkbox.js'
 
 
 export async function openFilters(driver) {
+    const dateField = await getElementById(driver, 'max0')
+    if (await dateField.isDisplayed()) {
+        console.log('---> Filters toolbar is already open')
+        return
+    }
     const filterExpander = await getElementById(driver,'filtersExpander')
     await filterExpander.click()
-    console.log('---> FilterExpander clicked')
     const collapseFilter = await getElementById(driver, 'collapseFilter')
     await driver.wait(until.elementIsVisible(collapseFilter))
-    console.log('---> Filters visible')
-}
-
-export async function closeFilters(driver) {
-    const filterExpander = await getElementById(driver, 'filtersExpander')
-    await filterExpander.click()
-    // console.log('---> FilterExpander clicked')
-    const collapseFilter = await getElementById(driver, 'collapseFilter')
-    await driver.wait(until.elementIsNotVisible(collapseFilter))
-    // console.log('---> Filter invisible')
+    console.log('---> Filters toolbar opened')
 }
 
 export async function selectEndDate(driver, dateStr) {
