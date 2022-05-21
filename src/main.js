@@ -10,7 +10,7 @@ import { readConfig } from './config.js'
 import { login } from './login.js'
 import { loadPage, preparePage } from './page-operations.js'
 import { prepareMap } from './map-operations.js'
-import { openFilters, selectEndDate } from './filter-operations.js'
+import { selectEndDate } from './filter-operations.js'
 import { takeScreenshot } from './screenshot.js'
 import { getMapDimensions } from './map-operations.js'
 
@@ -30,9 +30,6 @@ try {
         await login(driver, username, password)
         await preparePage(driver)
     }
-    // Open the Filters toolbar (if it is not already open)
-    await openFilters(driver)
-
     if (mode <= 2) {
         await prepareMap(driver, dates[dates.length - 1])
     }
