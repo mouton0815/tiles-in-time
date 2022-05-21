@@ -1,6 +1,6 @@
 import { By } from 'selenium-webdriver'
 import { isoToUkDate, sleep } from './utils.js'
-import { selectEndDate } from './filter-operations.js'
+import { openFilters, selectEndDate} from './filter-operations.js'
 import { getElementById, getElementByPath } from './locators.js'
 import { clickCheckbox } from './checkbox.js'
 
@@ -30,6 +30,8 @@ export async function disableAutoZoom(driver) {
 }
 
 export async function prepareMap(driver, isoEndDate) {
+    await openFilters(driver)
+
     console.log('Deselect photos on map')
     await triggerMapControl(driver, 'View photos', false)
 
