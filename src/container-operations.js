@@ -18,7 +18,7 @@ async function showContainer(driver, checkboxId, containerId) {
         const checkbox = await getElementById(driver, checkboxId)
         await checkbox.click()
         await driver.wait(until.elementIsVisible(container))
-        console.log(`---> Container '${containerId}' visible`)
+        console.log(`Container '${containerId}' visible`)
     }
 }
 
@@ -29,6 +29,6 @@ async function hideContainer(driver, checkboxId, containerId) {
         const checkbox = await getElementById(driver, checkboxId)
         await checkbox.click()
         await driver.wait(until.elementIsNotVisible(container))
-        console.log(`---> Container '${containerId}' hidden`)
+        console.log(`Container '${containerId}' hidden`)
     }
 }

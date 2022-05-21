@@ -7,9 +7,10 @@ import { getElementByPath } from './locators.js'
 
 export async function loadPage(driver) {
     // Load page and wait for title
-    await driver.get('https://veloviewer.com')
+    const url = 'https://veloviewer.com'
+    await driver.get(url)
     await driver.wait(until.titleContains('VeloViewer'))
-    console.log('---> Page loaded')
+    console.log(`Page ${url} loaded`)
 }
 
 export async function preparePage(driver) {
@@ -30,6 +31,6 @@ export async function preparePage(driver) {
 async function openTab(driver, tab, delay) {
     const activitiesTab = await getElementByPath(driver, `//ul[@id="myTabs"]/li/a[contains(@href, "/${tab}")]`)
     await activitiesTab.click()
-    console.log(`---> Tab '${tab}' opened`)
+    console.log(`Tab '${tab}' opened`)
     await sleep(delay) // Let the filters bar collapse automatically // TODO: Can this be done better?
 }

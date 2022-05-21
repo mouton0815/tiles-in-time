@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "chromedriver": "^100.0.0",
+    "console-stamp": "^3.0.6",
     "jimp": "^0.16.1",
     "selenium-webdriver": "^4.1.1"
   }

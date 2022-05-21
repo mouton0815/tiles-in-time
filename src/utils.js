@@ -25,8 +25,8 @@ export function isoToUkDate(isoDateLine) {
 export function createFolder(name) {
     const folder = dirname(fileURLToPath(import.meta.url))
     const path = normalize(folder + '/../' + name)
-    console.log('--->', path)
     if (!fs.existsSync(path)) {
+        console.log('Create folder', path)
         fs.mkdirSync(path)
     }
 }

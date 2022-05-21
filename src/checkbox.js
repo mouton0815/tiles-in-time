@@ -12,15 +12,12 @@ export async function clickCheckbox(driver, byLocator, targetState) {
         try {
             const checkbox = await driver.wait(until.elementLocated(byLocator))
             let isSelected = await checkbox.isSelected()
-            // console.log(`---> Checkbox selected: ${isSelected}, target: ${targetState}`)
             if (targetState === isSelected) {
-                console.log('---> Checkbox already in target state')
+                console.log('Checkbox already in target state')
                 break
             }
             await checkbox.click()
-            // console.log(`---> Clicked, attempt ${attempts + 1}`)
             isSelected = await checkbox.isSelected()
-            // console.log('---> Checkbox selected now:', isSelected)
             if (targetState === isSelected) {
                 break
             }
@@ -28,7 +25,6 @@ export async function clickCheckbox(driver, byLocator, targetState) {
             if (++attempts === 10) {
                 throw new Error('Checkbox selection failed after 10 attempts')
             }
-            // console.log(`---> Checkbox click attempt ${attempts} failed, retrying`)
             await sleep(100) // Sleep a bit for next attempt
         }
     }

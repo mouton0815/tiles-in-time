@@ -1,7 +1,7 @@
 import jimp from 'jimp'
 
 export async function takeScreenshot(driver, dimensions, label, counter) {
-    console.log(`---> Take screenshot of '${label}'`)
+    console.log(`Take screenshot of '${label}'`)
 
     const base64Shot = await driver.takeScreenshot()
     const base64Image = base64Shot.replace(/^data:image\/png;base64,/, '')
