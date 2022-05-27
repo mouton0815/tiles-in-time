@@ -7,6 +7,7 @@ import { getElementByPath } from './locators.js'
 export async function loadPage(driver) {
     // Load page and wait for title
     const url = 'https://veloviewer.com'
+    console.log('Loading', url)
     await driver.get(url)
     await driver.wait(until.titleContains('VeloViewer'))
     console.log(`Page ${url} loaded`)
