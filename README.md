@@ -36,16 +36,16 @@ map zoom level after date selections.
 Make sure [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/en/download/) are installed on your computer.
 
 ```
-$ git clone https://github.com/mouton0815/tiles-in-time.git
-$ cd tiles-in-time
-$ npm install
+git clone https://github.com/mouton0815/tiles-in-time.git
+cd tiles-in-time
+npm install
 ```
 
 # Configuration
 Before you can run the app, you need to create a custom configuration:
 
 ```
-$ cp config.json.example config.json
+cp config.json.example config.json
 ```
 | Config key | Description                                                                                                                                                                                                                                                                        | Example                                                                                           |
 |------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
@@ -68,4 +68,29 @@ A minimal configuration for the creation of three screenshots on a running Chrom
     "2022-03-17 A nice one"
   ]
 }
+```
+
+# Running
+If you use mode 1 and let the app open a Chrome browser (i.e. you do _not_ specify a value for `"cromePort"`), then simply type
+```
+npm start
+```
+Otherwise, you need to start a Chrome browser with remote debugging enabled.
+It is also recommended to use a dedicated directory for user data.
+On Windows, open a PowerShell and run
+```
+& 'C:\Program Files\Google\Chrome\Application\chrome.exe' --remote-debugging-port=9222 --user-data-dir='C:\tmp\ChromeProfile'
+```
+Then run the app with
+```
+npm start
+```
+The app will output some logging information to the console and save the screenshots in folder [screenshots](./screenshots).
+
+# Creating a Movie
+A good tool to make a movie from the series of screenshots is [FFmeg](https://ffmpeg.org/).
+Various options to create a slideshow are described [here](https://trac.ffmpeg.org/wiki/Slideshow).
+An example call is
+```
+C:\Tools\ffmpeg-n5.0\bin\ffmpeg.exe -framerate 0.5 -i screenshots\img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
 ```

@@ -1,7 +1,3 @@
-// & 'C:\Program Files\Google\Chrome\Application\chrome.exe' --remote-debugging-port=9222 --user-data-dir='C:\tmp\ChromeProfile'
-// C:\Tools\ffmpeg-n5.0\bin\ffmpeg.exe -framerate 0.5 -i img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
-// https://trac.ffmpeg.org/wiki/Slideshow
-
 import 'chromedriver'
 import chrome from 'selenium-webdriver/chrome.js'
 import console_stamp from 'console-stamp'
