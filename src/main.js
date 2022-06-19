@@ -28,9 +28,9 @@ try {
     if (mode <= 1) {
         await loadPage(driver)
         await login(driver, username, password)
+        await preparePage(driver, routeVisibility)
     }
     if (mode <= 2) {
-        await preparePage(driver, routeVisibility)
         await prepareMap(driver, dates[dates.length - 1])
     }
 
