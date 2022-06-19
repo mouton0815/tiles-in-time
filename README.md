@@ -23,14 +23,14 @@ The modes in detail are:
   prepares the map (in particular chooses the proper zoom level),
   and takes the screenshots.
 * Mode **2**: This mode assumes that a Chrome instance is running, and that the _Activities_ tab of VeloViewer is opened.
-  It prepares the map and takes the screenshots.
+  It opens the filter bar if needed, adjusts the zoom level, and takes screenshots.
 * Mode **3**: In this mode nothing is changed on the map. In particular, the zoom level is kept.
   The _Filters_ bar must be open. The app immediately starts taking screenshots.
   Mode 3 runs completely offline; the VeloViewer server is not accessed.
   
-Note that in modes 2 and 3 the app switches to the _Activities_ tab twice, the first time to adjust map settings
+Note that in mode 1, the app switches to the _Activities_ tab twice, the first time to adjust map settings
 on the map toolbar, the second time to take screenshots. This circumvents a VeloViewer (or Leaflet) quirk that changes the
-map zoom level after date selections.
+map zoom level after date selections, especially if the "Map settings" overlay was opened previously.
 
 # Installation
 Make sure [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/en/download/) are installed on your computer.
@@ -95,3 +95,11 @@ An example call is
 ```
 C:\Tools\ffmpeg-5.0.1\bin\ffmpeg.exe -framerate 0.5 -i screenshots\img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
 ```
+
+# Known Bugs
+If you see strange zooming effects during screenshot creation on modes 2 and 3, you likely opened the
+"Map settings" overlay previously. That is apparently a VeloViewer or Leaflet quirk.
+To overcome the problem, manually switch from the _Activities_ tab to any other
+tab, and then back to the _Activities_ tab
+(in mode 1, the app does the back and forth tab switching for you).
+
