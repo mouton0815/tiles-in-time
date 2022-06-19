@@ -2,12 +2,15 @@ import fs from 'fs'
 import { errorExit, extractDate } from './utils.js'
 
 export function readConfig() {
-    const { mode = 2, username, password, chromePort, dates, startDate, endDate } = JSON.parse(fs.readFileSync('./config.json'))
+    const { mode = 2, username, password, chromePort, dates, startDate, endDate, routeVisibility = 1 } = JSON.parse(fs.readFileSync('./config.json'))
     if (mode > 1 && !chromePort) {
         errorExit(`Mode ${mode} requires "chromePort" to be defined (i.e. connect to a running Chrome)`)
     }
+    if (!Number.isInteger(routeVisibility) || routeVisibility < 0 || routeVisibility > 2) {
+        errorExit('The value of routeVisibility must be 0, 1, or 2')
+    }
     const datesArray = createDatesArray(dates, startDate, endDate)
-    return { mode, username, password, chromePort, dates: datesArray }
+    return { mode, username, password, chromePort, dates: datesArray, routeVisibility }
 }
 
 /**

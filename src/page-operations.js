@@ -1,7 +1,7 @@
 import { until } from 'selenium-webdriver'
 import { sleep } from './utils.js'
 import { prepareMapContainer } from './container-operations.js'
-import { disableAutoZoom } from './map-operations.js'
+import { applyMapSettings } from './map-operations.js'
 import { getElementByPath } from './locators.js'
 
 export async function loadPage(driver) {
@@ -13,10 +13,10 @@ export async function loadPage(driver) {
     console.log(`Page ${url} loaded`)
 }
 
-export async function preparePage(driver) {
+export async function preparePage(driver, routeVisibility) {
     await openTab(driver, 'activities', 3000)
     await prepareMapContainer(driver)
-    await disableAutoZoom(driver)
+    await applyMapSettings(driver, routeVisibility)
 
     // There is a really strange VeloViewer bug: When the "Map Settings" modal window was opened once (to e.g.
     // disable the auto zoom as done above), then the selection of certain routes leads to strange zoom-in effects.

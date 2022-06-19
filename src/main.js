@@ -14,7 +14,7 @@ import { getMapDimensions } from './map-operations.js'
 // Add timestamp and log level to console logging
 console_stamp(console, {  format: ':date(yyyy-mm-dd HH:MM:ss)' })
 
-const { mode, username, password, dates, chromePort } = readConfig()
+const { mode, username, password, dates, chromePort, routeVisibility } = readConfig()
 const chromeOptions = chromePort
     ? new chrome.Options().debuggerAddress(`127.0.0.1:${chromePort}`)
     : new chrome.Options().addArguments('--start-maximized')
@@ -28,9 +28,9 @@ try {
     if (mode <= 1) {
         await loadPage(driver)
         await login(driver, username, password)
-        await preparePage(driver)
     }
     if (mode <= 2) {
+        await preparePage(driver, routeVisibility)
         await prepareMap(driver, dates[dates.length - 1])
     }
 

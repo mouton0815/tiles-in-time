@@ -1,5 +1,5 @@
 import { By, until } from 'selenium-webdriver'
-import { errorExit } from './utils.js'
+import { errorExit, sleep } from './utils.js'
 import { getElementById } from './locators.js'
 import { clickCheckbox } from './checkbox.js'
 
@@ -14,6 +14,7 @@ export async function openFilters(driver) {
     await filterExpander.click()
     const collapseFilter = await getElementById(driver, 'collapseFilter')
     await driver.wait(until.elementIsVisible(collapseFilter))
+    await sleep(500) // In rare cases, following actions complain about an invisible date field
     console.log('Filters toolbar opened')
 }
 
