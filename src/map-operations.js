@@ -7,11 +7,12 @@ import { clickCheckbox } from './checkbox.js'
 export async function getMapDimensions(driver) {
     const container = await getElementById(driver, 'mapContainer')
     const viewPort = await container.getRect()
+    console.log('Use screenshot viewport', viewPort)
     const dimensions = {
         x: Math.ceil(viewPort.x),
         y: Math.ceil(viewPort.y),
-        w: Math.floor(viewPort.width),
-        h: Math.floor(viewPort.height)
+        w: Math.floor(viewPort.width / 2) * 2, // Sigh, ffmpeg requires width/height divisible by 2
+        h: Math.floor(viewPort.height / 2) * 2
     }
     console.log('Use screenshot viewport', dimensions)
     return dimensions
