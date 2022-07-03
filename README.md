@@ -33,7 +33,9 @@ on the map toolbar, the second time to take screenshots. This circumvents a Velo
 map zoom level after date selections, especially if the "Map settings" overlay was opened previously.
 
 # Installation
-Make sure [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/en/download/) are installed on your computer.
+Make sure [Git](https://git-scm.com/downloads),
+[Node.js](https://nodejs.org/en/download/) (v14.8 or higher),
+and [npm](https://www.npmjs.com/) are installed on your computer.
 
 ```
 git clone https://github.com/mouton0815/tiles-in-time.git
@@ -80,7 +82,11 @@ Otherwise, you need to start a Chrome browser with remote debugging enabled.
 It is also recommended to use a dedicated directory for user data.
 On Windows, open a PowerShell and run
 ```
-& 'C:\Program Files\Google\Chrome\Application\chrome.exe' --remote-debugging-port=9222 --user-data-dir='C:\tmp\ChromeProfile'
+& 'C:\Program Files\Google\Chrome\Application\chrome.exe' --remote-debugging-port=9222 --user-data-dir='C:\tmp\chrome-profile'
+```
+On Linux run
+```
+/opt/google/chrome/chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-profile
 ```
 Then run the app with
 ```
@@ -91,7 +97,7 @@ The app will output some logging information to the console and save the screens
 # Creating a Movie
 A good tool to make a movie from the series of screenshots is [FFmeg](https://ffmpeg.org/).
 Various options to create a slideshow are described [here](https://trac.ffmpeg.org/wiki/Slideshow).
-An example call is
+An example call on Windows is
 ```
 C:\Tools\ffmpeg-5.0.1\bin\ffmpeg.exe -framerate 0.5 -i screenshots\img%03d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p out.mp4
 ```
