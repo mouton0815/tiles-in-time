@@ -104,7 +104,7 @@ C:\Tools\ffmpeg-5.0.1\bin\ffmpeg.exe -framerate 0.5 -i screenshots\img%03d.png -
 
 # Known Bugs
 If you see strange zooming effects during screenshot creation on modes 2 and 3, you likely opened the
-"Map settings" overlay previously. That is apparently a VeloViewer or Leaflet quirk.
+VeloViewer "Map settings" overlay previously. That is apparently a VeloViewer or Leaflet quirk.
 To overcome the problem, manually switch from the _Activities_ tab to any other
 tab, and then back to the _Activities_ tab
 (in mode 1, the app does the back and forth tab switching for you).
